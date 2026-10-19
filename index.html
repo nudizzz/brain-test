@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Brain Quest</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;font-family:"Trebuchet MS",system-ui,sans-serif;background:linear-gradient(#6ec6ff,#d5f3ff);color:#23305a;display:flex;justify-content:center}
+.scr{display:none;width:100%;max-width:640px;padding:14px;text-align:center}.scr.on{display:block}
+h1{font-size:2.8rem;margin:.3em 0;color:#fff;text-shadow:0 4px 0 #3a7bd5}h2{margin:.3em 0}
+.b{font:inherit;font-weight:700;border:0;border-radius:16px;padding:12px 20px;margin:5px;background:#ffb703;color:#3b2a00;box-shadow:0 5px 0 #c98600;cursor:pointer;font-size:1rem}
+.b:active{transform:translateY(3px);box-shadow:0 2px 0 #c98600}.b.g{background:#52d273;box-shadow:0 5px 0 #2b9c4b;color:#08340f}.b.r{background:#ff6b6b;box-shadow:0 5px 0 #c24444;color:#fff}.b:disabled{opacity:.45}
+.card{background:#fff;border-radius:20px;padding:12px;box-shadow:0 6px 0 #0002;margin:8px 0}
+#grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}#grid .b{padding:16px 0;margin:0;font-size:1.2rem}
+#bar{height:10px;background:#fff8;border-radius:9px;overflow:hidden}#bar i{display:block;height:100%;width:0;background:#52d273;transition:width .4s}
+#stage{padding:6px}#stage svg{width:100%;height:auto;max-height:58vh;display:block;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:14px}
+.d{cursor:grab}.tr{transition:transform 1.5s ease-in-out}
+.fld{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid #0001;text-align:left}
+.fld input,.fld select{font:inherit;padding:4px;border-radius:8px;border:2px solid #9bb;max-width:55%}.fld input[type=color]{width:54px;height:34px;padding:0}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid #345;margin:0 2px;cursor:pointer}
+.ov{display:none;position:fixed;inset:0;background:#0007;align-items:center;justify-content:center;z-index:9;padding:12px}.ov.on{display:flex}
+.ov .card{max-width:460px;width:100%;max-height:92vh;overflow:auto;text-align:center}
+#toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,30px);background:#23305a;color:#fff;padding:10px 16px;border-radius:14px;opacity:0;transition:.25s;z-index:30;max-width:92vw;text-align:center;pointer-events:none}#toast.on{opacity:1;transform:translate(-50%,0)}
+.cf{position:fixed;top:-20px;width:10px;height:14px;z-index:20;animation:fall 2.4s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}@keyframes bob{50%{transform:translateY(-16px)}}
+.pbar{height:12px;background:#e3e9f3;border-radius:8px;overflow:hidden;margin-top:6px}.pbar i{display:block;height:100%;width:0;background:#52d273;transition:width .2s}
+</style></head><body>
+
+<div class="scr on" id="title"><h1>Brain Quest</h1><p>Ten tricky puzzles. Don't believe your eyes!</p>
+<button class="b g" id="bp">Play</button><br><button class="b" id="be">Edit Character</button></div>
+
+<div class="scr" id="lvls"><h1 style="font-size:2rem">Choose a level</h1><div id="grid"></div><p>Solve a level to unlock the next one.</p>
+<button class="b" data-go="title">Back</button><button class="b r" id="brst">Reset progress</button></div>
+
+<div class="scr" id="game">
+<div style="display:flex;justify-content:space-between;align-items:center"><button class="b" id="bm" style="margin:0">Levels</button><b id="lv"></b></div>
+<div id="bar"><i></i></div><h2 id="ttl"></h2><div class="card" id="q"></div>
+<div id="pre"></div><div class="card" id="stage"></div><div id="extra"></div>
+<button class="b" id="bh">Hint</button><button class="b r" id="br">Restart</button></div>
+
+<div class="scr" id="done"><h1>You did it!</h1>
+<div class="card"><h2>All 10 levels complete</h2><p>You fed the cat, caught the thief and ran a flawless security inspection. Brain officially tested!</p></div>
+<button class="b g" data-go="lvls">Play again</button><button class="b" data-go="title">Main menu</button></div>
+
+<div class="ov" id="win"><div class="card"><h2>Solved!</h2><p id="wm"></p><button class="b g" id="nx"></button></div></div>
+
+<div class="ov" id="ed"><div class="card"><h2>Character Editor</h2>
+<svg id="prev" viewBox="0 0 200 330" style="width:130px;height:215px;background:#e8f4ff;border-radius:14px"></svg>
+<div id="fields"></div>
+<button class="b r" id="edr">↺ Reset Appearance</button><button class="b g" id="edx">Done</button></div></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   1. CHARACTER CONFIGURATION  — EDIT THIS SECTION TO CHANGE THE CHARACTER
+   (You can also use the in-game editor: Title screen > Edit Character,
+   or the Edit button in Level 10. Saved edits override these defaults;
+   press "Reset Appearance" in the editor to go back to them.)
+   ===================================================================== */
+const DEFAULT_CHAR = {
+  name:        'Luna',        // character name (shown on the scanner display)
+  expression:  'happy',       // happy | neutral | surprised | wink
+  hairStyle:   'long',        // long | bob | bun | short
+  hairColor:   '#5a3a22',     // any hex colour
+  skin:        '#f2c9a0',     // skin tone (hex colour)
+  eyes:        '#2f80ed',     // eye colour
+  outfit:      'jacket',      // jacket | dress | hoodie  (always fully clothed)
+  outfitColor: '#e8546b',     // top / dress colour
+  pants:       '#34457a',     // trouser colour
+  shoes:       'sneakers',    // sneakers | boots | flats
+  shoeColor:   '#f5f5f5',     // shoe colour
+  accessory:   'glasses',     // none | glasses | hat | scarf | earrings
+  bag:         '#f6b93b',     // handbag colour
+  build:       'regular'      // slim | regular | curvy  (cartoon proportions)
+};
+// Dropdown choices used by the in-game editor (must match the names above)
+const OPTIONS = {
+  expression:['happy','neutral','surprised','wink'], hairStyle:['long','bob','bun','short'],
+  outfit:['jacket','dress','hoodie'], shoes:['sneakers','boots','flats'],
+  accessory:['none','glasses','hat','scarf','earrings'], build:['slim','regular','curvy']
+};
+// Labelled editor rows: [property, label shown in the editor, control type]
+const FIELDS = [
+  ['name','Character name','text'],['expression','Facial expression','sel'],
+  ['hairStyle','Hairstyle','sel'],['hairColor','Hair colour','col'],
+  ['skin','Skin tone','col'],['eyes','Eye colour','col'],
+  ['outfit','Outfit style','sel'],['outfitColor','Outfit colour','col'],['pants','Trouser colour','col'],
+  ['shoes','Shoes','sel'],['shoeColor','Shoe colour','col'],
+  ['accessory','Accessory','sel'],['bag','Bag colour','col'],['build','Body proportions','sel']
+];
+const SKIN_PRESETS = ['#fde0c8','#f2c9a0','#d9a066','#a86b3c','#6e4026'];
+
+/* =====================================================================
+   LEVEL 10 CONFIG (edit this block; no other code needs changing)
+   The scene is 400 wide x 300 tall. All numbers below are in those units.
+   ===================================================================== */
+const SCANNER = {
+  character: {
+    src:   'assets/character-clothed.png', // person in ordinary clothes (transparent PNG)
+    alien: 'assets/character-alien.png',   // alien form: SAME pose and SAME canvas size
+    x:95, y:6, w:200, h:288                // box both images are fitted into (centred, feet at the bottom)
+  },
+  body: {x:120, y:10, w:150, h:280}, // area the player must scan to finish (cover the figure, not empty corners)
+  radius:56,     // size of the scanning lens (bigger = easier)
+  follow:.3,     // lens smoothing: 0.1 = floaty, 1 = locked to the pointer
+  coverage:.9,   // share of the body area that must be scanned (0.9 = 90%)
+  isHuman:false  // the correct answer: false = she is an alien in disguise
+};
+
+
+/* ===================== 2. UTILITIES ===================== */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CHAR=Object.assign({},DEFAULT_CHAR);
+try{Object.assign(CHAR,JSON.parse(LS.get('bq_char')||'{}'))}catch(e){}
+let un=Math.min(10,Math.max(1,+LS.get('bq_un')||1)),cur=0,won=false,runId=0,sv=null,AC;
+const stage=$('#stage');
+function beep(f=600,d=.12,t='sine',v=.12){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
+function confetti(){for(let i=0;i<44;i++){const c=document.createElement('div');c.className='cf';c.style.left=Math.random()*100+'vw';c.style.background=`hsl(${Math.random()*360} 90% 60%)`;c.style.animationDelay=Math.random()*.6+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),3400)}}
+function show(id){$$('.scr').forEach(s=>s.classList.toggle('on',s.id==id));if(id=='lvls')renderGrid()}
+
+/* Scene helpers: T = emoji prop, D = draggable object, setScene = new level SVG */
+/* ICONS: original SVG art, each drawn in a 40x40 box centred on (0,0).
+   T() looks icons up by key, so Levels 1-9 need no changes. The plain names at the
+   bottom (phone, keys...) are also the icon names you use for hidden items in SCANNER. */
+const fc=(c,m,x='')=>`<circle r=18 fill=${c} /><circle cx=-6 cy=-3 r=2.2 fill=#222 /><circle cx=6 cy=-3 r=2.2 fill=#222 />${m}${x}`;
+const SM='<path d="M-7 6Q0 13 7 6" stroke=#222 stroke-width=2 fill=none />',FL='<path d="M-6 8H6" stroke=#222 stroke-width=2 />',OP='<ellipse cy=8 rx=4 ry=5 fill=#a33 />';
+const FIG=(s,h)=>`<circle cy=-12 r=7 fill=${s} /><rect x=-7 y=-4 width=14 height=18 rx=5 fill=${h} /><rect x=-6 y=13 width=5 height=8 fill=#333 /><rect x=1 y=13 width=5 height=8 fill=#333 />`;
+const ICONS={
+'🐱':'<circle r=15 cy=3 fill=#f0a04b /><path d="M-14-6L-12-18L-3-11ZM14-6L12-18L3-11Z" fill=#f0a04b /><circle cx=-5 cy=1 r=2 fill=#222 /><circle cx=5 cy=1 r=2 fill=#222 /><path d="M-3 7Q0 10 3 7M-8 6H-17M8 6H17" stroke=#222 fill=none />',
+'😻':fc('#f0a04b',SM,'<path d="M-14-8L-12-19L-3-13ZM14-8L12-19L3-13Z" fill=#f0a04b />'),
+'🐟':'<ellipse rx=14 ry=8 fill=#4aa3e0 /><path d="M12 0L20-8V8Z" fill=#4aa3e0 /><circle cx=-8 cy=-2 r=1.8 fill=#fff />',
+'🦴':'<rect x=-12 y=-3 width=24 height=6 rx=3 fill=#f5f0e6 stroke=#bbb /><circle cx=-13 cy=-4 r=4 fill=#f5f0e6 /><circle cx=-13 cy=4 r=4 fill=#f5f0e6 /><circle cx=13 cy=-4 r=4 fill=#f5f0e6 /><circle cx=13 cy=4 r=4 fill=#f5f0e6 />',
+'⭐':'<path d="M0-18L5-6L18-6L8 3L12 16L0 8L-12 16L-8 3L-18-6L-5-6Z" fill=#ffd23f stroke=#e0a800 />',
+'📦':'<rect x=-18 y=-16 width=36 height=34 fill=#c8914f stroke=#8a5a2b stroke-width=2 /><rect x=-18 y=-16 width=36 height=8 fill=#dba868 />',
+'🪨':'<path d="M-18 14L-12-6L2-12L16-4L18 14Z" fill=#8d949c stroke=#5d636b stroke-width=2 />',
+'🌳':'<rect x=-3 y=4 width=6 height=14 fill=#7a4a1a /><circle cy=-4 r=15 fill=#3fa34d /><circle cx=-8 cy=2 r=9 fill=#4cbc5c />',
+'☀️':'<circle r=11 fill=#ffd23f /><path d="M0-19V-14M0 14V19M-19 0H-14M14 0H19M-13-13L-10-10M13 13L10 10M13-13L10-10M-13 13L-10 10" stroke=#ffb703 stroke-width=3 />',
+'🍦':'<path d="M-9-2H9L0 18Z" fill=#e5a85f /><circle cy=-8 r=10 fill=#ffd1e3 /><circle cy=-16 r=6 fill=#fff />',
+'😎':fc('#ffd966',SM,'<rect x=-12 y=-6 width=24 height=7 rx=3 fill=#222 />'),
+'☂️':'<path d="M-18 0Q0-24 18 0Z" fill=#e63946 /><path d="M0 0V16Q0 20 4 18" stroke=#555 stroke-width=2 fill=none />',
+'☁️':'<ellipse cy=4 rx=18 ry=8 fill=#fff /><circle cx=-6 cy=-2 r=8 fill=#fff /><circle cx=6 cy=-4 r=10 fill=#fff />',
+'🛏️':'<rect x=-18 y=0 width=36 height=10 fill=#6c5ce7 /><rect x=-18 y=-10 width=6 height=22 fill=#8a5a2b /><rect x=-15 y=-4 width=14 height=6 rx=3 fill=#fff />',
+'😴':fc('#ffd966',FL,'<path d="M-9-3H-3M3-3H9" stroke=#222 stroke-width=2.5 /><text x=10 y=-12 font-size=11 fill=#456>z</text>'),
+'⏰':'<circle r=13 fill=#fff stroke=#e63946 stroke-width=3 /><path d="M0-7V0L5 3" stroke=#222 stroke-width=2 fill=none /><circle cx=-11 cy=-13 r=4 fill=#e63946 /><circle cx=11 cy=-13 r=4 fill=#e63946 />',
+'🎺':'<path d="M-18-3H6L18-10V10L6 3H-18Z" fill=#ffb703 stroke=#c98600 stroke-width=2 />',
+'🪶':'<path d="M-14 16Q-16-12 14-16Q16 12-14 16Z" fill=#ff9f9f stroke=#d46 /><path d="M-14 16L10-10" stroke=#a22 />',
+'🤧':fc('#ffd966',OP,'<path d="M12 8H20" stroke=#9cf stroke-width=3 />'),
+'😃':fc('#ffd966',SM),'😄':fc('#ffd966',SM),
+'🥵':fc('#ff7a59',FL,'<path d="M-3 9Q0 16 3 9Z" fill=#e75480 />'),
+'🏁':'<rect x=-12 y=-18 width=3 height=36 fill=#555 /><path d="M-9-18H14V0H-9Z" fill=#222 /><path d="M-9-18H0V-9H-9ZM5-9H14V0H5Z" fill=#fff />',
+'🚶':FIG('#f1c27d','#3a86ff'),'🧍':FIG('#f1c27d','#2a9d8f'),
+'🦆':'<ellipse cy=6 rx=15 ry=10 fill=#ffd23f /><circle cx=8 cy=-8 r=9 fill=#ffd23f /><path d="M15-8H22L15-4Z" fill=#ff8c1a /><circle cx=10 cy=-10 r=1.8 fill=#222 />',
+'🔑':'<circle cx=-8 r=7 fill=none stroke=#d4a017 stroke-width=4 /><path d="M-1 0H17M12 0V7M17 0V6" stroke=#d4a017 stroke-width=3 />',
+'🔒':'<rect x=-10 y=-2 width=20 height=16 rx=3 fill=#555 /><path d="M-6-2V-8A6 6 0 0 1 6-8V-2" stroke=#555 stroke-width=3 fill=none />',
+'🖼️':'<rect x=-17 y=-14 width=34 height=28 fill=#8a5a2b /><rect x=-13 y=-10 width=26 height=20 fill=#9fd3ff /><path d="M-13 10L-4-2L2 4L8-2L13 10Z" fill=#4cbc5c />',
+'🌵':'<rect x=-5 y=-16 width=10 height=34 rx=5 fill=#3fa34d /><rect x=-15 y=-6 width=6 height=14 rx=3 fill=#3fa34d /><rect x=9 y=-10 width=6 height=14 rx=3 fill=#3fa34d />',
+'🧑':fc('#f1c27d',SM,'<path d="M-18-2Q-18-20 0-20Q18-20 18-2Q8-12 0-10Q-8-12-18-2Z" fill=#3b2a1a />'),
+'👧':fc('#f1c27d',SM,'<path d="M-18 6Q-20-20 0-20Q20-20 18 6L14-4Q0-14-14-4Z" fill=#b5651d />'),
+'👦':fc('#e0ac69',SM,'<path d="M-17-4Q-14-20 0-19Q14-20 17-4Q0-12-17-4Z" fill=#222 />'),
+'👵':fc('#f1c27d',SM,'<path d="M-18 0Q-18-20 0-20Q18-20 18 0Q10-10 0-8Q-10-10-18 0Z" fill=#ddd />'),
+'🍪':'<circle r=15 fill=#c68642 /><circle cx=-5 cy=-4 r=2 fill=#4a2a0a /><circle cx=5 cy=2 r=2 fill=#4a2a0a /><circle cx=-3 cy=7 r=2 fill=#4a2a0a />',
+'⛓️':'<circle cx=-8 r=8 fill=none stroke=#888 stroke-width=4 /><circle cx=8 r=8 fill=none stroke=#888 stroke-width=4 />',
+'📱':'<rect x=-9 y=-16 width=18 height=32 rx=4 fill=#333 /><rect x=-7 y=-12 width=14 height=22 fill=#7fd1ff />',
+'✂️':'<path d="M-12-14L8 8M12-14L-8 8" stroke=#aaa stroke-width=3 /><circle cx=-8 cy=12 r=5 fill=none stroke=#e63946 stroke-width=3 /><circle cx=8 cy=12 r=5 fill=none stroke=#e63946 stroke-width=3 />',
+'🍫':'<rect x=-14 y=-9 width=28 height=18 rx=3 fill=#6b3e26 /><path d="M-5-9V9M4-9V9M-14 0H14" stroke=#4a2a18 />',
+'🧨':'<rect x=-5 y=-8 width=10 height=24 rx=2 fill=#e63946 /><path d="M0-8Q4-14 8-12" stroke=#222 fill=none />',
+'🚗':'<rect x=-17 y=-2 width=34 height=11 rx=4 fill=#3a86ff /><path d="M-9-2L-5-10H6L10-2Z" fill=#7fb0ff /><circle cx=-9 cy=10 r=4 fill=#222 /><circle cx=9 cy=10 r=4 fill=#222 />'
+};
+Object.assign(ICONS,{phone:ICONS['📱'],keys:ICONS['🔑'],snack:ICONS['🍫'],scissors:ICONS['✂️'],firecracker:ICONS['🧨'],car:ICONS['🚗']});
+const T=(c,s=40,x=0,y=0)=>ICONS[c]?`<g transform="translate(${x} ${y}) scale(${s/40})">${ICONS[c]}</g>`:`<text x="${x}" y="${y}" font-size="${s}" text-anchor="middle" dominant-baseline="central">${c}</text>`;
+
+const D=(id,x,y,inner)=>`<g class="d" id="${id}" data-x="${x}" data-y="${y}"><g transform="translate(${x} ${y})">${inner}</g></g>`;
+const gnd=(c='#8bd36b',y=235)=>`<rect y="${y}" width="400" height="${300-y}" fill="${c}"/>`;
+function setScene(inner,bg='#bfe9ff'){stage.innerHTML=`<svg viewBox="0 0 400 300"><rect width="400" height="300" fill="${bg}"/>${inner}</svg>`;sv=stage.firstChild;$$('#stage .d').forEach(n=>{n._x=n._y=0;n._b=[+n.dataset.x,+n.dataset.y]})}
+const pt=e=>{const p=sv.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(sv.getScreenCTM().inverse())};
+const P=n=>[n._b[0]+n._x,n._b[1]+n._y];
+const dist=(n,x,y)=>{const p=P(n);return Math.hypot(p[0]-x,p[1]-y)};
+const back=n=>{n._x=n._y=0;n.firstChild&&n.setAttribute('transform','translate(0 0)')};
+function drag(n,o={}){n.addEventListener('pointerdown',e=>{if(won)return;e.preventDefault();n.setPointerCapture(e.pointerId);const p=pt(e),ox=p.x-n._x,oy=p.y-n._y;o.start&&o.start(n);
+const mv=ev=>{const q=pt(ev);n._x=q.x-ox;n._y=q.y-oy;n.setAttribute('transform',`translate(${n._x} ${n._y})`);o.move&&o.move(n)};
+const up=()=>{n.removeEventListener('pointermove',mv);n.removeEventListener('pointerup',up);n.removeEventListener('pointercancel',up);o.end&&o.end(n)};
+n.addEventListener('pointermove',mv);n.addEventListener('pointerup',up);n.addEventListener('pointercancel',up)})}
+
+/* ===================== 3. CHARACTER ART (separate editable parts) ===================== */
+function charSVG(c){
+ const k={slim:.88,regular:1,curvy:1.14}[c.build]||1,w=n=>+(n*k).toFixed(1),H=c.hairColor,S=c.skin,O=c.outfitColor,L=100,A=c.outfit=='dress'?S:O;
+ // PART: hair (back layer + front bangs)
+ const hb={long:`<path d="M58 72Q54 18 100 20Q146 18 142 72L150 160Q100 172 50 160Z" fill="${H}"/>`,bob:`<path d="M58 72Q54 18 100 20Q146 18 142 72L144 108Q100 118 56 108Z" fill="${H}"/>`,bun:`<circle cx="100" cy="16" r="17" fill="${H}"/>`,short:''}[c.hairStyle]||'';
+ const hf=`<path d="M60 70Q60 26 100 26Q140 26 140 70Q122 46 100 52Q78 46 60 70Z" fill="${H}"/>`;
+ // PART: legs + shoes
+ const legs=[-25,2].map(x=>`<rect x="${L+w(x)}" y="195" width="${w(23)}" height="98" rx="8" fill="${c.pants}"/>`).join('');
+ const foot=cx=>c.shoes=='boots'?`<rect x="${cx-w(14)}" y="266" width="${w(28)}" height="48" rx="8" fill="${c.shoeColor}"/>`:c.shoes=='flats'?`<rect x="${cx-w(15)}" y="298" width="${w(30)}" height="16" rx="8" fill="${c.shoeColor}"/>`:`<rect x="${cx-w(17)}" y="290" width="${w(34)}" height="24" rx="11" fill="${c.shoeColor}" stroke="#0003" stroke-width="2"/><rect x="${cx-w(17)}" y="308" width="${w(34)}" height="6" rx="3" fill="#fff"/>`;
+ const shoes=foot(L-w(13.5))+foot(L+w(13.5));
+ // PART: outfit (always full coverage)
+ let out=`<rect x="92" y="98" width="16" height="18" fill="${S}"/><rect x="${L-w(36)-13}" y="116" width="17" height="82" rx="8" fill="${A}"/><rect x="${L+w(36)-4}" y="116" width="17" height="82" rx="8" fill="${A}"/><circle cx="${L-w(36)-4.5}" cy="203" r="9" fill="${S}"/><circle cx="${L+w(36)+4.5}" cy="203" r="9" fill="${S}"/><rect x="${L-w(36)}" y="108" width="${w(72)}" height="102" rx="22" fill="${O}"/>`;
+ if(c.outfit=='jacket')out+=`<path d="M100 112V208" stroke="#0003" stroke-width="3"/><rect x="${L-w(30)}" y="148" width="24" height="24" rx="5" fill="#0002"/><rect x="${L-w(30)}" y="190" width="24" height="18" rx="5" fill="#0002"/>`;
+ if(c.outfit=='dress')out+=`<path d="M${L-w(36)} 190L${L-w(54)} 242H${L+w(54)}L${L+w(36)} 190Z" fill="${O}"/><rect x="${L-w(36)}" y="150" width="${w(72)}" height="8" fill="#0002"/>`;
+ if(c.outfit=='hoodie')out+=`<ellipse cx="100" cy="112" rx="${w(32)}" ry="15" fill="${O}"/><ellipse cx="100" cy="114" rx="${w(22)}" ry="9" fill="#0002"/><rect x="${L-w(26)}" y="170" width="${w(52)}" height="32" rx="10" fill="#0002"/>`;
+ // PART: bag
+ const bx=L+w(40),bag=`<path d="M${bx+8} 176Q${bx+21} 156 ${bx+34} 176" stroke="${c.bag}" stroke-width="5" fill="none"/><rect x="${bx}" y="176" width="42" height="34" rx="8" fill="${c.bag}" stroke="#0003" stroke-width="2"/><rect x="${bx+16}" y="188" width="10" height="8" rx="2" fill="#0003"/>`;
+ // PART: head + face
+ const head=`<circle cx="62" cy="74" r="7" fill="${S}"/><circle cx="138" cy="74" r="7" fill="${S}"/><circle cx="100" cy="70" r="38" fill="${S}"/>`;
+ const eye=(x,wk)=>wk?`<path d="M${x-6} 71Q${x} 65 ${x+6} 71" stroke="#333" stroke-width="3" fill="none"/>`:`<circle cx="${x}" cy="70" r="6.5" fill="#fff"/><circle cx="${x}" cy="70" r="4" fill="${c.eyes}"/><circle cx="${x}" cy="70" r="1.8" fill="#111"/>`;
+ const mouth={happy:`<path d="M88 88Q100 101 112 88" stroke="#7a2e2e" stroke-width="3" fill="none" stroke-linecap="round"/>`,wink:`<path d="M88 88Q100 101 112 88" stroke="#7a2e2e" stroke-width="3" fill="none" stroke-linecap="round"/>`,neutral:`<path d="M90 90H110" stroke="#7a2e2e" stroke-width="3" stroke-linecap="round"/>`,surprised:`<ellipse cx="100" cy="91" rx="6" ry="8" fill="#7a2e2e"/>`}[c.expression]||'';
+ const face=eye(86,0)+eye(114,c.expression=='wink')+`<path d="M77 57Q86 51 95 57M105 57Q114 51 123 57" stroke="${H}" stroke-width="3" fill="none"/><circle cx="76" cy="84" r="5" fill="#ff8aa055"/><circle cx="124" cy="84" r="5" fill="#ff8aa055"/>`+mouth;
+ // PART: accessory
+ const acc={glasses:`<circle cx="86" cy="70" r="12" fill="#fff3" stroke="#333" stroke-width="3"/><circle cx="114" cy="70" r="12" fill="#fff3" stroke="#333" stroke-width="3"/><path d="M98 70H102" stroke="#333" stroke-width="3"/>`,hat:`<path d="M54 46Q58 0 100 2Q142 0 146 46Z" fill="#e76f51"/><rect x="48" y="42" width="104" height="10" rx="5" fill="#c4492c"/>`,scarf:`<rect x="${L-w(26)}" y="104" width="${w(52)}" height="16" rx="8" fill="#f4a261"/><rect x="${L+w(8)}" y="112" width="14" height="34" rx="6" fill="#f4a261"/>`,earrings:`<circle cx="62" cy="88" r="4" fill="gold"/><circle cx="138" cy="88" r="4" fill="gold"/>`,none:''}[c.accessory]||'';
+ return `<g class="part hair-back">${hb}</g><g class="part legs">${legs}</g><g class="part shoes">${shoes}</g><g class="part outfit">${out}</g><g class="part bag">${bag}</g><g class="part head">${head}</g><g class="part face">${face}</g><g class="part hair-front">${hf}</g><g class="part accessory">${acc}</g>`}
+
+/* ---- in-game character editor ---- */
+const saveChar=()=>LS.set('bq_char',JSON.stringify(CHAR));
+const prev=()=>{$('#prev').innerHTML=charSVG(CHAR);const c=$('#chr');if(c)c.innerHTML=charSVG(CHAR)};
+function syncEd(){$$('#fields [data-k]').forEach(i=>i.value=CHAR[i.dataset.k]);prev()}
+function buildEd(){$('#fields').innerHTML=FIELDS.map(([k,l,t])=>{const i=t=='sel'?`<select data-k="${k}">${OPTIONS[k].map(o=>`<option value="${o}">${o[0].toUpperCase()+o.slice(1)}</option>`).join('')}</select>`:`<input data-k="${k}" type="${t=='col'?'color':'text'}" maxlength="14">`;return `<label class="fld"><span>${l}</span>${i}</label>`}).join('')+`<div class="fld"><span>Skin tone presets</span><span>${SKIN_PRESETS.map(c=>`<button class="sw" data-c="${c}" style="background:${c}" aria-label="Skin ${c}"></button>`).join('')}</span></div>`;syncEd()}
+$('#fields').addEventListener('input',e=>{const k=e.target.dataset.k;if(!k)return;CHAR[k]=e.target.value;saveChar();prev()});
+$('#fields').addEventListener('click',e=>{const c=e.target.dataset.c;if(c){CHAR.skin=c;saveChar();syncEd()}});
+$('#edr').onclick=()=>{Object.assign(CHAR,DEFAULT_CHAR);saveChar();syncEd()};
+$('#edx').onclick=()=>$('#ed').classList.remove('on');
+const openEd=()=>{buildEd();$('#ed').classList.add('on')};
+
+/* ===================== 4. LEVELS ===================== */
+const LV=[
+{t:'Feed the Cat',q:'The poor cat is starving. Feed it!',h:'What do cats love to eat? Drag it to the cat.',f(){
+ setScene(gnd()+`<g id="cat">${T('🐱',90,320,195)}</g><text x="320" y="130" text-anchor="middle" font-size="16" font-weight="700" fill="#c0392b">Meow! Hungry!</text>${D('bone',150,235,T('🦴',46))}${D('fish',70,205,T('🐟',54))}`);
+ drag($('#bone'),{end(n){if(dist(n,320,195)<75)toast("Cats don't want bones!");back(n)}});
+ drag($('#fish'),{end(n){if(dist(n,320,195)<80){n.style.display='none';$('#cat').innerHTML=T('😻',90,320,195);win('Purrfect! The cat is full.')}}})}},
+{t:'Find the Hidden Star',q:'There is a star hiding somewhere. Find it!',h:'Things can be moved. Look underneath them.',f(){
+ setScene(gnd()+`<g id="star" style="cursor:pointer">${T('⭐',44,200,205)}</g>${D('box',200,205,T('📦',100))}${D('rock',90,215,T('🪨',64))}${D('bush',320,200,T('🌳',90))}`);
+ ['box','rock','bush'].forEach(i=>drag($('#'+i),{}));
+ $('#star').onclick=()=>win('Found it! Sneaky star.')}},
+{t:'Save the Ice Cream',q:"The sun is melting the ice cream. Save it!",h:'Block the sunshine. Something can shade the ice cream.',f(){
+ setScene(gnd('#f3d9a4',245)+`<g id="sun" style="cursor:pointer">${T('☀️',80,330,55)}</g><g id="ice">${T('🍦',70,200,215)}</g>${D('umb',70,150,T('☂️',64))}${D('cloud',60,50,T('☁️',90))}`,'#9fdcff');
+ $('#sun').onclick=()=>toast("Too bright! Block it, don't poke it.");$('#ice').onclick=()=>toast("It's melting!");
+ const chk=(n,y)=>{if(dist(n,200,y)<60){$('#sun').style.opacity=.35;$('#ice').innerHTML=T('😎',60,200,175)+T('🍦',70,200,215);win('Cool! The ice cream is saved.')}};
+ drag($('#umb'),{end:n=>chk(n,155)});drag($('#cloud'),{end:n=>chk(n,140)})}},
+{t:'Wake Up the Character',q:'He is fast asleep. Wake him up!',h:'Something gentle, and a little tickly...',f(){
+ setScene(gnd('#c9a27a',240)+`${T('🛏️',130,200,205)}<g id="sl">${T('😴',54,200,182)}</g><text x="250" y="140" font-size="22">Z z z</text>${D('alarm',60,90,T('⏰',56))}${D('horn',60,205,T('🎺',56))}${D('fea',340,100,T('🪶',56))}`,'#ffe8c2');
+ const hit=(id,m)=>drag($('#'+id),{end(n){if(dist(n,200,185)<80)m(n);back(n)}});
+ hit('alarm',()=>{beep(900,.4,'square');toast('RIIING! He hit snooze...')});hit('horn',()=>{beep(300,.4,'sawtooth');toast('He sleeps through the music!')});
+ hit('fea',n=>{n.style.display='none';$('#sl').innerHTML=T('🤧',54,200,182);setTimeout(()=>{$('#sl').innerHTML=T('😃',54,200,182);win('Ah-choo! He is awake.')},700)})}},
+{t:'Fix the Broken Bridge',q:'Help the traveller reach the flag!',h:'One plank is too short. Use both planks to span the gap.',f(){
+ const pl='<rect x="-55" y="-6" width="110" height="12" rx="4" fill="#c68642" stroke="#7a4a1a" stroke-width="2"/>';
+ setScene(`<rect y="250" x="120" width="160" height="50" fill="#4aa3e0"/><rect y="200" width="120" height="100" fill="#9c6b3f"/><rect x="280" y="200" width="120" height="100" fill="#9c6b3f"/><rect y="194" width="120" height="8" fill="#6fcf5b"/><rect x="280" y="194" width="120" height="8" fill="#6fcf5b"/>${T('🏁',40,360,172)}<g id="ch" class="tr">${T('🚶',54,40,172)}</g>${D('p1',60,230,pl)}${D('p2',340,230,pl)}`);
+ const chk=()=>{const a=P($('#p1')),b=P($('#p2')),[l,r]=a[0]<b[0]?[a,b]:[b,a];
+  if(Math.abs(l[1]-196)<26&&Math.abs(r[1]-196)<26&&l[0]>90&&l[0]<=182&&r[0]>=218&&r[0]<305&&r[0]-l[0]<=110){won=false;$('#ch').style.transform='translateX(320px)';beep(500,.1);setTimeout(()=>win('Safe across!'),1700);won=true}};
+ ['p1','p2'].forEach(i=>drag($('#'+i),{end:chk}))}},
+{t:'Find the Odd One Out',q:'One of these ducks is not like the others. Tap to find it!',h:'Poke every duck and watch how it reacts.',f(){
+ const odd=Math.random()*5|0;
+ setScene(`<rect y="190" width="400" height="110" fill="#4aa3e0"/>${[0,1,2,3,4].map(i=>`<g class="dk" data-i="${i}" style="cursor:pointer">${T('🦆',58,60+i*70,165)}</g>`).join('')}`,'#d7f1ff');
+ $$('.dk').forEach(n=>n.onclick=()=>{if(won)return;if(+n.dataset.i==odd){n.style.transition='transform .8s,opacity .8s';n.style.transform='translateY(70px)';n.style.opacity=.2;toast('Glug glug... that one was a rock in disguise!');setTimeout(()=>win('Odd one found!'),900)}else{n.style.animation='none';void n.getBoundingClientRect();n.style.animation='bob .5s';beep(700,.1);toast('Quack! Floats happily.')}})}},
+{t:'Escape the Room',q:'The door is locked. Help the explorer escape!',h:'Rugs hide things. Look for a key.',f(){
+ setScene(`<rect y="240" width="400" height="60" fill="#c49a6c"/><g id="door"><rect x="285" y="100" width="90" height="140" rx="6" fill="#8a5a2b" stroke="#5a3a1a" stroke-width="4"/><circle cx="300" cy="175" r="5" fill="gold"/>${T('🔒',30,330,150)}</g><g id="pic" style="cursor:pointer">${T('🖼️',60,120,80)}</g><g id="ch" class="tr">${T('🧍',56,50,205)}</g>${D('key',110,266,T('🔑',34))}${D('rug',110,262,'<rect x="-60" y="-14" width="120" height="28" rx="6" fill="#d6455d" stroke="#8c1f32" stroke-width="3"/>')}`,'#f6e7c8');
+ $('#door').onclick=()=>toast('Locked! Find a key.');$('#pic').onclick=()=>toast('Just a boring painting.');
+ drag($('#rug'),{});drag($('#key'),{end(n){if(dist(n,330,175)<75){n.style.display='none';$('#door').innerHTML='<rect x="285" y="100" width="90" height="140" rx="6" fill="#3a2a1a"/>'+T('✨',34,330,170);$('#ch').style.transform='translateX(280px)';beep(660,.2);setTimeout(()=>win('Click! Freedom!'),1600);won=true}else back(n)}})}},
+{t:'Help the Thirsty Character',q:'He is dying of thirst. Give him a drink of water!',h:'Water is coming from the tap. Use a glass, then turn the tap.',f(){
+ setScene(gnd('#f2c14e',240)+`${T('🌵',60,60,205)}<g id="man">${T('🥵',64,335,205)}</g><rect x="140" y="40" width="14" height="60" fill="#7c8a99"/><rect x="140" y="40" width="70" height="14" rx="6" fill="#7c8a99"/><rect x="196" y="40" width="14" height="46" fill="#7c8a99"/><g id="hd" style="cursor:pointer"><circle cx="147" cy="30" r="15" fill="#e63946"/>${T('⟳',20,147,30)}</g>${D('gl',60,232,'<path d="M-16 -22H16L12 22H-12Z" fill="#cdefff88" stroke="#2a6f97" stroke-width="3"/><rect id="wt" x="-11" y="22" width="22" height="0" fill="#3a9bdc"/>')}`,'#ffe9a8');
+ let full=false;
+ $('#hd').onclick=()=>{if(won)return;if(dist($('#gl'),203,185)<42){full=true;const r=$('#wt');r.setAttribute('y',-13);r.setAttribute('height',33);beep(500,.3);toast('Glass filled!')}else toast('Water wasted! Put a glass under the tap first.')};
+ drag($('#gl'),{end(n){if(dist(n,335,205)<75){if(full){n.style.display='none';$('#man').innerHTML=T('😄',64,335,205);win('Gulp! Refreshing.')}else{toast("It's empty!");back(n)}}}})}},
+{t:'Catch the Thief',q:'Someone stole the cookies! Inspect the clues and cuff the thief.',h:'Tap each suspect for a clue. Who has crumbs?',f(){
+ const S=[['Sam','🧑',"Sam: \"I was reading. My hands are clean.\""],['Mia','👧','Mia: chocolate crumbs all over her sleeve, and a crumb trail leads right to her!'],['Leo','👦','Leo: "Cookies make me sneeze. I never touch them."'],['Gran','👵','Gran: has been napping in her chair since lunch.']];
+ setScene(gnd('#cdb8f0',235)+`<text x="200" y="40" text-anchor="middle" font-size="17" font-weight="700" fill="#4a2c8a">The cookie jar is empty!</text>${T('🍪',36,200,75)}<text x="150" y="214" font-size="10" fill="#7a4a1a">• • •</text>`+S.map((s,i)=>`<g class="su" data-i="${i}" style="cursor:pointer">${T(s[1],62,[60,150,250,340][i],165)}<text x="${[60,150,250,340][i]}" y="212" text-anchor="middle" font-size="14" font-weight="700" fill="#23305a">${s[0]}</text></g>`).join('')+D('cuffs',200,270,T('⛓️',44)),'#efe6ff');
+ $$('.su').forEach(n=>n.onclick=()=>toast(S[+n.dataset.i][2]));
+ drag($('#cuffs'),{end(n){const p=P(n);let b=-1,bd=70;[60,150,250,340].forEach((x,i)=>{const d=Math.hypot(p[0]-x,p[1]-165);if(d<bd){bd=d;b=i}});
+  if(b==1){n.style.display='none';win('Busted! Mia confesses: "I was SO hungry!"')}else{if(b>=0)toast(S[b][0]+' has an alibi!');back(n)}}})}},
+/* ---- LEVEL 10 (the last entry in LV) ---- */
+{t:'Human or Alien?',q:'Is she human? Scan every part of her, then decide.',h:'Drag the lens slowly over all of her, from head to toe. The more you scan, the more you will see.',f(){
+ const C=SCANNER,R=C.radius,run=runId,c=C.character,b=C.body,nm=esc(CHAR.name);
+ $('#q').textContent=`Is ${CHAR.name} human or not? Scan every part of her, then decide.`;
+ stage.innerHTML='<div style="padding:50px;color:#456">Loading...</div>';
+ let okA=null,okB=null;const done=()=>{if(okA!==null&&okB!==null)build(okA,okB)};
+ const i1=new Image();i1.onload=()=>{okA=true;done()};i1.onerror=()=>{okA=false;done()};i1.src=c.src;
+ if(c.alien){const i2=new Image();i2.onload=()=>{okB=true;done()};i2.onerror=()=>{okB=false;done()};i2.src=c.alien}else okB=false;
+ function build(ok,oka){if(run!==runId)return;
+  const fit=s=>`<image href="${s}" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" preserveAspectRatio="xMidYMax meet"/>`;
+  // Layer 1: the disguise (your image, or the built-in character if the image can't load)
+  const me=ok?fit(c.src):`<g transform="translate(${c.x+(c.w-200*c.h/330)/2} ${c.y}) scale(${c.h/330})">${charSVG(CHAR)}</g>`;
+  // Layer 2: the alien (your image, or a green-tinted copy if the alien image can't load)
+  const al=oka?fit(c.alien):`<g filter="url(#al)">${me}</g>`;
+  const bg='<rect width="400" height="300" fill="url(#wl)"/><rect y="272" width="400" height="28" fill="#cdb995"/>';
+  setScene(`<defs><filter id="al"><feColorMatrix type="hueRotate" values="95"/><feColorMatrix type="saturate" values="2"/></filter>
+   <radialGradient id="rg"><stop offset="0" stop-color="#fff"/><stop offset=".7" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+   <linearGradient id="wl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3ead9"/><stop offset="1" stop-color="#e2d3b8"/></linearGradient>
+   <mask id="rm" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="300"><rect width="400" height="300" fill="#000"/><g id="mz"></g><circle id="mb" r="${R}" cx="-300" cy="-300" fill="url(#rg)"/></mask></defs>
+   ${bg}${me}<g mask="url(#rm)">${bg}${al}</g>
+   <g id="sc" transform="translate(-300 -300)"><path d="M${R*.72} ${R*.72}L${R*1.5} ${R*1.5}" stroke="#7a4a1a" stroke-width="13" stroke-linecap="round"/><circle r="${R}" fill="#fff" fill-opacity=".1" stroke="#8a5a2b" stroke-width="7"/><circle r="${R-4}" fill="none" stroke="#f0c36d" stroke-width="2.5"/></g>`,'#f3ead9');
+  $('#pre').innerHTML=`<div class="card"><b>How to play</b><p>Is <b>${nm}</b> really human? Drag the magnifying lens (mouse or finger) over every part of her. Wherever you scan, you will see what is underneath. Cover her from head to toe, then decide.</p><button class="b g" id="gos">Start</button></div>`;
+  $('#extra').innerHTML=`<div class="card"><div style="display:flex;justify-content:space-between"><b>Scanned</b><b id="pp">0%</b></div><div class="pbar"><i id="mpb"></i></div></div><button class="b g" id="dh">Human</button><button class="b r" id="dn">Not human</button><div id="rep"></div>`;
+  // Coverage grid over the body area (data only: keeps the scan fast)
+  const S=8,cw=Math.ceil(b.w/S),ch=Math.ceil(b.h/S),tot=cw*ch,cell=new Uint8Array(tot);
+  let cov=0,ready=false,on=false,act=false,tx=200,ty=150,bx=-300,by=-300,sx=null,sy=0;
+  const set=(id,a,v)=>$(id).setAttribute(a,v),pp=()=>Math.min(100,Math.round(cov/tot/C.coverage*100));
+  const mark=()=>{const x0=Math.max(0,Math.floor((bx-R-b.x)/S)),x1=Math.min(cw-1,Math.floor((bx+R-b.x)/S)),y0=Math.max(0,Math.floor((by-R-b.y)/S)),y1=Math.min(ch-1,Math.floor((by+R-b.y)/S));
+   for(let j=y0;j<=y1;j++)for(let i=x0;i<=x1;i++){const k=j*cw+i;if(!cell[k]&&Math.hypot(b.x+i*S+S/2-bx,b.y+j*S+S/2-by)<=R*.9){cell[k]=1;cov++}}};
+  const px=e=>{if(!on||won)return;const p=pt(e);tx=p.x;ty=p.y;act=true};
+  sv.onpointermove=px;sv.onpointerdown=e=>{e.preventDefault();px(e)};
+  sv.onpointerleave=sv.onpointercancel=()=>{act=false};sv.onpointerup=e=>{if(e.pointerType!='mouse')act=false};
+  const tick=()=>{if(run!==runId)return;
+   if(bx<-100){bx=tx;by=ty}bx+=(tx-bx)*C.follow;by+=(ty-by)*C.follow;
+   set('#mb','cx',bx);set('#mb','cy',by);set('#mb','opacity',act?1:0);set('#sc','transform',`translate(${bx} ${by})`);
+   // Every time the lens moves far enough, stamp a permanent soft circle into the mask: that area stays alien
+   if(act&&!won&&(sx===null||Math.hypot(bx-sx,by-sy)>R*.3)){sx=bx;sy=by;
+    $('#mz').insertAdjacentHTML('beforeend',`<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${(R*.95).toFixed(1)}" fill="url(#rg)"/>`);
+    mark();const p=pp();$('#pp').textContent=p+'%';set('#mpb','style','width:'+p+'%');
+    if(p>=100&&!ready){ready=true;$('#mz').insertAdjacentHTML('beforeend','<rect id="fullr" width="400" height="300" fill="#fff" style="opacity:0;transition:opacity 1s"/>');setTimeout(()=>{const f=$('#fullr');if(f)f.style.opacity=1},50);beep(660,.2);toast('Fully scanned! Now decide.')}}
+   requestAnimationFrame(tick)};
+  requestAnimationFrame(tick);
+  $('#gos').onclick=()=>{on=true;$('#pre').innerHTML=''};
+  const decide=h=>{if(won)return;if(!on)return toast('Press "Start" first.');if(!ready)return toast(`Scan more of ${CHAR.name} first (${pp()}%).`);
+   if(h===!!C.isHuman)win(h?`Correct! ${CHAR.name} is human.`:`Correct! ${CHAR.name} is an alien in disguise!`);
+   else{beep(150,.4,'sawtooth');$('#rep').innerHTML='<div class="card"><b>Not quite.</b> Look carefully at what the lens showed you.<br><button class="b" id="rt">Try again</button></div>';$('#rt').onclick=()=>play(cur)}};
+  $('#dh').onclick=()=>decide(true);$('#dn').onclick=()=>decide(false)}}}
+];
+
+/* ===================== 5. GAME ENGINE ===================== */
+function win(m='Great job!'){if(won&&cur!=4&&cur!=6)return;if(won&&$('#win').classList.contains('on'))return;won=true;
+ beep(523,.15);setTimeout(()=>beep(659,.15),150);setTimeout(()=>beep(784,.3),300);
+ if(cur+2>un&&cur<9){un=cur+2;LS.set('bq_un',un)}
+ $('#bar i').style.width=(cur+1)*10+'%';$('#wm').textContent=m;$('#nx').textContent=cur<9?'Next Level ▶':'Finish';
+ confetti();setTimeout(()=>$('#win').classList.add('on'),cur==4||cur==6?200:700)}
+function play(i){if(i>=un||i<0)return;cur=i;won=false;runId++;$('#win').classList.remove('on');const L=LV[i];
+ $('#lv').textContent=`Level ${i+1} of 10`;$('#bar i').style.width=i*10+'%';$('#ttl').textContent=`${i+1}. ${L.t}`;$('#q').textContent=L.q;$('#pre').innerHTML='';$('#extra').innerHTML='';
+ show('game');L.f()}
+function renderGrid(){$('#grid').innerHTML=LV.map((l,i)=>`<button class="b ${i<un?'g':''}" ${i>=un?'disabled':''} data-i="${i}" title="${l.t}">${i<un?i+1:'–'}</button>`).join('')}
+$('#grid').onclick=e=>{const b=e.target.closest('button');if(b&&!b.disabled)play(+b.dataset.i)};
+$$('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
+$('#bp').onclick=()=>show('lvls');$('#be').onclick=openEd;$('#bm').onclick=()=>{runId++;show('lvls')};
+$('#bh').onclick=()=>toast(''+LV[cur].h);$('#br').onclick=()=>play(cur);
+$('#brst').onclick=()=>{un=1;LS.set('bq_un',1);renderGrid();toast('Progress reset.')};
+$('#nx').onclick=()=>{$('#win').classList.remove('on');if(cur<9)play(cur+1);else{runId++;show('done');confetti()}};
+renderGrid();
+</script></body></html>
