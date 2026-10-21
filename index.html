@@ -97,14 +97,15 @@ const SKIN_PRESETS = ['#fde0c8','#f2c9a0','#d9a066','#a86b3c','#6e4026'];
 const SCANNER = {
   character: {
     src:   'assets/character-clothed.png', // person in ordinary clothes (transparent PNG)
-    alien: 'assets/character-alien.png',   // alien form: SAME pose and SAME canvas size
-    x:95, y:6, w:200, h:288                // box both images are fitted into (centred, feet at the bottom)
+    alien: 'assets/character-alien.png',   // alien skin, shown by the normal Scanner: SAME pose and SAME canvas size
+    final: 'assets/character-final.png',   // what is UNDER the alien skin, shown by the Super Scanner: SAME pose and SAME canvas size
+    x:95, y:6, w:200, h:288                // box all images are fitted into (centred, feet at the bottom)
   },
   body: {x:120, y:10, w:150, h:280}, // area the player must scan to finish (cover the figure, not empty corners)
-  radius:56,     // size of the scanning lens (bigger = easier)
+  radius:56,     // size of both scanning lenses (bigger = easier)
   follow:.3,     // lens smoothing: 0.1 = floaty, 1 = locked to the pointer
   coverage:.9,   // share of the body area that must be scanned (0.9 = 90%)
-  isHuman:false  // the correct answer: false = she is an alien in disguise
+  isHuman:true   // answer revealed by the Super Scanner: true = a human in an alien costume, false = a real alien
 };
 
 
@@ -267,31 +268,38 @@ const LV=[
  drag($('#cuffs'),{end(n){const p=P(n);let b=-1,bd=70;[60,150,250,340].forEach((x,i)=>{const d=Math.hypot(p[0]-x,p[1]-165);if(d<bd){bd=d;b=i}});
   if(b==1){n.style.display='none';win('Busted! Mia confesses: "I was SO hungry!"')}else{if(b>=0)toast(S[b][0]+' has an alibi!');back(n)}}})}},
 /* ---- LEVEL 10 (the last entry in LV) ---- */
-{t:'Human or Alien?',q:'Is she human? Scan every part of her, then decide.',h:'Drag the lens slowly over all of her, from head to toe. The more you scan, the more you will see.',f(){
+{t:'Human or Alien?',q:'Is she a human in an alien costume, or a real alien? Use both scanners, then decide.',h:'Scan her from head to toe with the Scanner. Then switch on the Super Scanner and scan her again to see what is under the alien skin.',f(){
  const C=SCANNER,R=C.radius,run=runId,c=C.character,b=C.body,nm=esc(CHAR.name);
- $('#q').textContent=`Is ${CHAR.name} human or not? Scan every part of her, then decide.`;
+ $('#q').textContent=`Is ${CHAR.name} a human in an alien costume, or a real alien? Use both scanners, then decide.`;
  stage.innerHTML='<div style="padding:50px;color:#456">Loading...</div>';
- let okA=null,okB=null;const done=()=>{if(okA!==null&&okB!==null)build(okA,okB)};
- const i1=new Image();i1.onload=()=>{okA=true;done()};i1.onerror=()=>{okA=false;done()};i1.src=c.src;
- if(c.alien){const i2=new Image();i2.onload=()=>{okB=true;done()};i2.onerror=()=>{okB=false;done()};i2.src=c.alien}else okB=false;
- function build(ok,oka){if(run!==runId)return;
+ // Load the three images (clothed, alien, final). Any that fail fall back to built-in art.
+ const srcs=[c.src,c.alien,c.final],oks=[null,null,null];
+ function chk(){if(oks.every(v=>v!==null))build(oks[0],oks[1],oks[2])}
+ srcs.forEach((s,i)=>{if(!s){oks[i]=false;return}const im=new Image();im.onload=()=>{oks[i]=true;chk()};im.onerror=()=>{oks[i]=false;chk()};im.src=s});
+ chk();
+ function build(ok,oka,okf){if(run!==runId)return;
   const fit=s=>`<image href="${s}" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" preserveAspectRatio="xMidYMax meet"/>`;
   // Layer 1: the disguise (your image, or the built-in character if the image can't load)
   const me=ok?fit(c.src):`<g transform="translate(${c.x+(c.w-200*c.h/330)/2} ${c.y}) scale(${c.h/330})">${charSVG(CHAR)}</g>`;
-  // Layer 2: the alien (your image, or a green-tinted copy if the alien image can't load)
+  // Layer 2: the alien skin (revealed by the normal Scanner)
   const al=oka?fit(c.alien):`<g filter="url(#al)">${me}</g>`;
+  // Layer 3: what is under the alien skin (revealed by the Super Scanner)
+  const fin=okf?fit(c.final):`<g filter="url(#xr)">${al}</g>`;
   const bg='<rect width="400" height="300" fill="url(#wl)"/><rect y="272" width="400" height="28" fill="#cdb995"/>';
   setScene(`<defs><filter id="al"><feColorMatrix type="hueRotate" values="95"/><feColorMatrix type="saturate" values="2"/></filter>
+   <filter id="xr"><feColorMatrix type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0"/></filter>
    <radialGradient id="rg"><stop offset="0" stop-color="#fff"/><stop offset=".7" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
    <linearGradient id="wl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3ead9"/><stop offset="1" stop-color="#e2d3b8"/></linearGradient>
-   <mask id="rm" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="300"><rect width="400" height="300" fill="#000"/><g id="mz"></g><circle id="mb" r="${R}" cx="-300" cy="-300" fill="url(#rg)"/></mask></defs>
-   ${bg}${me}<g mask="url(#rm)">${bg}${al}</g>
-   <g id="sc" transform="translate(-300 -300)"><path d="M${R*.72} ${R*.72}L${R*1.5} ${R*1.5}" stroke="#7a4a1a" stroke-width="13" stroke-linecap="round"/><circle r="${R}" fill="#fff" fill-opacity=".1" stroke="#8a5a2b" stroke-width="7"/><circle r="${R-4}" fill="none" stroke="#f0c36d" stroke-width="2.5"/></g>`,'#f3ead9');
-  $('#pre').innerHTML=`<div class="card"><b>How to play</b><p>Is <b>${nm}</b> really human? Drag the magnifying lens (mouse or finger) over every part of her. Wherever you scan, you will see what is underneath. Cover her from head to toe, then decide.</p><button class="b g" id="gos">Start</button></div>`;
-  $('#extra').innerHTML=`<div class="card"><div style="display:flex;justify-content:space-between"><b>Scanned</b><b id="pp">0%</b></div><div class="pbar"><i id="mpb"></i></div></div><button class="b g" id="dh">Human</button><button class="b r" id="dn">Not human</button><div id="rep"></div>`;
+   <mask id="rm" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="300"><rect width="400" height="300" fill="#000"/><g id="mz"></g><circle id="mb" r="${R}" cx="-300" cy="-300" fill="url(#rg)"/></mask>
+   <mask id="rm2" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="300"><rect width="400" height="300" fill="#000"/><g id="mz2"></g><circle id="mb2" r="${R}" cx="-300" cy="-300" fill="url(#rg)"/></mask></defs>
+   ${bg}${me}<g mask="url(#rm)">${bg}${al}</g><g mask="url(#rm2)">${bg}${fin}</g>
+   <g id="sc" transform="translate(-300 -300)"><path d="M${R*.72} ${R*.72}L${R*1.5} ${R*1.5}" stroke="#7a4a1a" stroke-width="13" stroke-linecap="round"/><circle r="${R}" fill="#fff" fill-opacity=".1" stroke="#8a5a2b" stroke-width="7"/><circle r="${R-4}" fill="none" stroke="#f0c36d" stroke-width="2.5"/></g>
+   <g id="sc2" display="none" transform="translate(-300 -300)"><path d="M${R*.72} ${R*.72}L${R*1.5} ${R*1.5}" stroke="#1f4f7a" stroke-width="13" stroke-linecap="round"/><circle r="${R}" fill="#38e1ff" fill-opacity=".12" stroke="#2a6fdb" stroke-width="7"/><circle r="${R-4}" fill="none" stroke="#9af3ff" stroke-width="2.5"/><circle r="${R-12}" fill="none" stroke="#38e1ff" stroke-width="1.5" stroke-dasharray="6 6" opacity=".8"/></g>`,'#f3ead9');
+  $('#pre').innerHTML=`<div class="card"><b>How to play</b><p>Is <b>${nm}</b> a human in an alien costume, or a real alien? First drag the Scanner (mouse or finger) over every part of her to see her alien skin. Then switch on the <b>Super Scanner</b> and scan her again to see what is underneath. Then decide.</p><button class="b g" id="gos">Start</button></div>`;
+  $('#extra').innerHTML=`<div class="card"><div style="display:flex;justify-content:space-between"><b id="pl">Scanner</b><b id="pp">0%</b></div><div class="pbar"><i id="mpb"></i></div></div><button class="b g" id="sup" style="display:none">⚡ Activate Super Scanner</button><div id="dec" style="display:none"><button class="b g" id="dh">Human in costume</button><button class="b r" id="dn">Real alien</button></div><div id="rep"></div>`;
   // Coverage grid over the body area (data only: keeps the scan fast)
   const S=8,cw=Math.ceil(b.w/S),ch=Math.ceil(b.h/S),tot=cw*ch,cell=new Uint8Array(tot);
-  let cov=0,ready=false,on=false,act=false,tx=200,ty=150,bx=-300,by=-300,sx=null,sy=0;
+  let cov=0,ph=1,scanOn=true,ready2=false,on=false,act=false,tx=200,ty=150,bx=-300,by=-300,sx=null,sy=0;
   const set=(id,a,v)=>$(id).setAttribute(a,v),pp=()=>Math.min(100,Math.round(cov/tot/C.coverage*100));
   const mark=()=>{const x0=Math.max(0,Math.floor((bx-R-b.x)/S)),x1=Math.min(cw-1,Math.floor((bx+R-b.x)/S)),y0=Math.max(0,Math.floor((by-R-b.y)/S)),y1=Math.min(ch-1,Math.floor((by+R-b.y)/S));
    for(let j=y0;j<=y1;j++)for(let i=x0;i<=x1;i++){const k=j*cw+i;if(!cell[k]&&Math.hypot(b.x+i*S+S/2-bx,b.y+j*S+S/2-by)<=R*.9){cell[k]=1;cov++}}};
@@ -299,19 +307,29 @@ const LV=[
   sv.onpointermove=px;sv.onpointerdown=e=>{e.preventDefault();px(e)};
   sv.onpointerleave=sv.onpointercancel=()=>{act=false};sv.onpointerup=e=>{if(e.pointerType!='mouse')act=false};
   const tick=()=>{if(run!==runId)return;
+   const M=ph==1?'#mb':'#mb2',Z=ph==1?'#mz':'#mz2',L=ph==1?'#sc':'#sc2';
    if(bx<-100){bx=tx;by=ty}bx+=(tx-bx)*C.follow;by+=(ty-by)*C.follow;
-   set('#mb','cx',bx);set('#mb','cy',by);set('#mb','opacity',act?1:0);set('#sc','transform',`translate(${bx} ${by})`);
-   // Every time the lens moves far enough, stamp a permanent soft circle into the mask: that area stays alien
-   if(act&&!won&&(sx===null||Math.hypot(bx-sx,by-sy)>R*.3)){sx=bx;sy=by;
-    $('#mz').insertAdjacentHTML('beforeend',`<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${(R*.95).toFixed(1)}" fill="url(#rg)"/>`);
+   set(M,'cx',bx);set(M,'cy',by);set(M,'opacity',act?1:0);set(L,'transform',`translate(${bx} ${by})`);
+   // Every time the lens moves far enough, stamp a permanent soft circle into the active mask
+   if(act&&scanOn&&!won&&(sx===null||Math.hypot(bx-sx,by-sy)>R*.3)){sx=bx;sy=by;
+    $(Z).insertAdjacentHTML('beforeend',`<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${(R*.95).toFixed(1)}" fill="url(#rg)"/>`);
     mark();const p=pp();$('#pp').textContent=p+'%';set('#mpb','style','width:'+p+'%');
-    if(p>=100&&!ready){ready=true;$('#mz').insertAdjacentHTML('beforeend','<rect id="fullr" width="400" height="300" fill="#fff" style="opacity:0;transition:opacity 1s"/>');setTimeout(()=>{const f=$('#fullr');if(f)f.style.opacity=1},50);beep(660,.2);toast('Fully scanned! Now decide.')}}
+    if(p>=100){scanOn=false;
+     $(Z).insertAdjacentHTML('beforeend','<rect id="fullr'+ph+'" width="400" height="300" fill="#fff" style="opacity:0;transition:opacity 1s"/>');
+     setTimeout(()=>{const f=$('#fullr'+ph);if(f)f.style.opacity=1},50);beep(660,.2);
+     if(ph==1){$('#sup').style.display='';toast('Scanner complete! Now activate the Super Scanner.')}
+     else{ready2=true;$('#dec').style.display='';toast('Super scan complete! Now decide.')}}}
    requestAnimationFrame(tick)};
   requestAnimationFrame(tick);
   $('#gos').onclick=()=>{on=true;$('#pre').innerHTML=''};
-  const decide=h=>{if(won)return;if(!on)return toast('Press "Start" first.');if(!ready)return toast(`Scan more of ${CHAR.name} first (${pp()}%).`);
-   if(h===!!C.isHuman)win(h?`Correct! ${CHAR.name} is human.`:`Correct! ${CHAR.name} is an alien in disguise!`);
-   else{beep(150,.4,'sawtooth');$('#rep').innerHTML='<div class="card"><b>Not quite.</b> Look carefully at what the lens showed you.<br><button class="b" id="rt">Try again</button></div>';$('#rt').onclick=()=>play(cur)}};
+  // Switch to the Super Scanner: the alien skin is already fully visible, now reveal what is under it
+  $('#sup').onclick=()=>{ph=2;cell.fill(0);cov=0;sx=null;scanOn=true;act=false;
+   $('#sup').style.display='none';$('#pl').textContent='Super Scanner';$('#pp').textContent='0%';set('#mpb','style','width:0%');
+   $('#sc').setAttribute('display','none');$('#sc2').removeAttribute('display');
+   beep(880,.15);toast('Super Scanner on! Reveal what is under the alien skin.')};
+  const decide=h=>{if(won)return;if(!on)return toast('Press "Start" first.');if(!ready2)return toast('Finish scanning with the Super Scanner first.');
+   if(h===!!C.isHuman)win(h?`Correct! ${CHAR.name} is a human in an alien costume!`:`Correct! ${CHAR.name} is a real alien!`);
+   else{beep(150,.4,'sawtooth');$('#rep').innerHTML='<div class="card"><b>Not quite.</b> Look carefully at what the Super Scanner showed you.<br><button class="b" id="rt">Try again</button></div>';$('#rt').onclick=()=>play(cur)}};
   $('#dh').onclick=()=>decide(true);$('#dn').onclick=()=>decide(false)}}}
 ];
 
