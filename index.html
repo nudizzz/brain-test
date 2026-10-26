@@ -2,30 +2,49 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Brain Quest</title>
-<style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>:root{--ink:#2b1b5a}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;min-height:100vh;font-family:"Trebuchet MS",system-ui,sans-serif;background:linear-gradient(#6ec6ff,#d5f3ff);color:#23305a;display:flex;justify-content:center}
-.scr{display:none;width:100%;max-width:640px;padding:14px;text-align:center}.scr.on{display:block}
-h1{font-size:2.8rem;margin:.3em 0;color:#fff;text-shadow:0 4px 0 #3a7bd5}h2{margin:.3em 0}
-.b{font:inherit;font-weight:700;border:0;border-radius:16px;padding:12px 20px;margin:5px;background:#ffb703;color:#3b2a00;box-shadow:0 5px 0 #c98600;cursor:pointer;font-size:1rem}
-.b:active{transform:translateY(3px);box-shadow:0 2px 0 #c98600}.b.g{background:#52d273;box-shadow:0 5px 0 #2b9c4b;color:#08340f}.b.r{background:#ff6b6b;box-shadow:0 5px 0 #c24444;color:#fff}.b:disabled{opacity:.45}
-.card{background:#fff;border-radius:20px;padding:12px;box-shadow:0 6px 0 #0002;margin:8px 0}
-#grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}#grid .b{padding:16px 0;margin:0;font-size:1.2rem}
-#bar{height:10px;background:#fff8;border-radius:9px;overflow:hidden}#bar i{display:block;height:100%;width:0;background:#52d273;transition:width .4s}
-#stage{padding:6px}#stage svg{width:100%;height:auto;max-height:58vh;display:block;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:14px}
+body{margin:0;min-height:100vh;font-family:"Fredoka","Baloo 2","Trebuchet MS",system-ui,sans-serif;background:linear-gradient(160deg,#7f5af0 0%,#c44dff 35%,#ff5fa2 72%,#ffb86b 100%) fixed;color:var(--ink);display:flex;justify-content:center;position:relative;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+body::before{width:60vmax;height:60vmax;left:-20vmax;top:-20vmax;background:radial-gradient(circle,#2ee6d699,#2ee6d600 65%)}
+body::after{width:64vmax;height:64vmax;right:-22vmax;bottom:-22vmax;background:radial-gradient(circle,#ffe66dbb,#ffe66d00 65%)}
+.scr{display:none;width:100%;max-width:640px;padding:14px;text-align:center;position:relative;z-index:1}.scr.on{display:block}
+.scr>p{color:#fff;font-weight:600;font-size:1.1rem;text-shadow:0 2px 0 #0003}
+h1{font-size:3.2rem;margin:.25em 0;color:#fff;letter-spacing:.02em;text-shadow:0 4px 0 #5a2fc2,0 9px 0 #0002}h2{margin:.3em 0}
+#title h1{animation:wob 2.6s ease-in-out infinite}
+.hero{font-size:3.4rem;margin-top:10px;animation:wob 2.6s ease-in-out infinite .3s}
+.b{font:inherit;font-weight:700;border:0;border-radius:18px;padding:12px 22px;margin:5px;background:#ffd93d;color:#4a2a00;box-shadow:0 6px 0 #e0a800;cursor:pointer;font-size:1.05rem;transition:transform .1s,filter .15s}
+.b:hover{filter:brightness(1.07);transform:translateY(-2px)}.b:active{transform:translateY(4px);box-shadow:0 2px 0 #e0a800}
+.b.g{background:#2ee59d;box-shadow:0 6px 0 #12b57a;color:#04382a}.b.r{background:#ff4d8d;box-shadow:0 6px 0 #c92a68;color:#fff}.b:disabled{opacity:.5;filter:grayscale(.4);transform:none}
+.card{background:#fff;border-radius:24px;padding:12px;box-shadow:0 7px 0 #4b1fa033,0 16px 30px #2b1b5a33;margin:8px 0}
+#q{font-weight:600;font-size:1.08rem;background:#fff9d6;border:3px dashed #ffb703}
+#ttl{color:#fff;text-shadow:0 3px 0 #5a2fc2}#lv{background:#fff;color:#7f3dff;border-radius:14px;padding:6px 12px;box-shadow:0 4px 0 #4b1fa033}
+#grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}#grid .b{padding:16px 0;margin:0;font-size:1.25rem}
+#grid .b.g:nth-child(5n+1){background:#ffd93d;box-shadow:0 6px 0 #e0a800;color:#4a2a00}
+#grid .b.g:nth-child(5n+2){background:#2ee59d;box-shadow:0 6px 0 #12b57a;color:#04382a}
+#grid .b.g:nth-child(5n+3){background:#ff4d8d;box-shadow:0 6px 0 #c92a68;color:#fff}
+#grid .b.g:nth-child(5n+4){background:#4cc9f0;box-shadow:0 6px 0 #1b98c4;color:#04364a}
+#grid .b.g:nth-child(5n){background:#ff9f43;box-shadow:0 6px 0 #d9760f;color:#4a2300}
+#grid .b:disabled{background:#e4dcff;box-shadow:0 6px 0 #b9acec;color:#9a8fc8;filter:none;opacity:1}
+#bar{height:14px;background:#ffffff66;border-radius:9px;overflow:hidden;margin:6px 0}#bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2ee59d,#ffd93d,#ff5fa2);border-radius:9px;transition:width .4s}
+#stage{padding:6px}#stage svg{width:100%;height:auto;max-height:58vh;display:block;touch-action:none;user-select:none;-webkit-user-select:none;border-radius:18px}
 .d{cursor:grab}.tr{transition:transform 1.5s ease-in-out}
 .fld{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid #0001;text-align:left}
-.fld input,.fld select{font:inherit;padding:4px;border-radius:8px;border:2px solid #9bb;max-width:55%}.fld input[type=color]{width:54px;height:34px;padding:0}
-.sw{width:26px;height:26px;border-radius:50%;border:2px solid #345;margin:0 2px;cursor:pointer}
-.ov{display:none;position:fixed;inset:0;background:#0007;align-items:center;justify-content:center;z-index:9;padding:12px}.ov.on{display:flex}
+.fld input,.fld select{font:inherit;padding:4px;border-radius:8px;border:2px solid #b9a6ff;max-width:55%}.fld input[type=color]{width:54px;height:34px;padding:0}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid #5a2fc2;margin:0 2px;cursor:pointer}
+.ov{display:none;position:fixed;inset:0;background:#2b1b5acc;align-items:center;justify-content:center;z-index:9;padding:12px}.ov.on{display:flex}
 .ov .card{max-width:460px;width:100%;max-height:92vh;overflow:auto;text-align:center}
-#toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,30px);background:#23305a;color:#fff;padding:10px 16px;border-radius:14px;opacity:0;transition:.25s;z-index:30;max-width:92vw;text-align:center;pointer-events:none}#toast.on{opacity:1;transform:translate(-50%,0)}
+#win .card{border:4px solid #ffd93d;animation:pop .35s ease-out}#win h2{font-size:2rem;color:#ff4d8d}
+#toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,30px);background:#2b1b5a;color:#fff;border:3px solid #ffd93d;padding:10px 16px;border-radius:16px;opacity:0;transition:.25s;z-index:30;max-width:92vw;text-align:center;pointer-events:none;font-weight:600}#toast.on{opacity:1;transform:translate(-50%,0)}
 .cf{position:fixed;top:-20px;width:10px;height:14px;z-index:20;animation:fall 2.4s linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}@keyframes bob{50%{transform:translateY(-16px)}}
-.pbar{height:12px;background:#e3e9f3;border-radius:8px;overflow:hidden;margin-top:6px}.pbar i{display:block;height:100%;width:0;background:#52d273;transition:width .2s}
+@keyframes wob{50%{transform:translateY(-8px) rotate(-1.5deg)}}@keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+.pbar{height:12px;background:#ece6ff;border-radius:8px;overflow:hidden;margin-top:6px}.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2ee59d,#4cc9f0);transition:width .2s}
+.pk{border:4px solid #fff;border-radius:18px;padding:0;background:#fff;cursor:pointer;width:31%;aspect-ratio:3/4;overflow:hidden;box-shadow:0 6px 0 #4b1fa033;transition:transform .15s}.pk:hover{transform:scale(1.05) rotate(-1deg)}.pk:active{transform:scale(.97)}.pk img{width:100%;height:100%;object-fit:cover;display:block}
 </style></head><body>
 
-<div class="scr on" id="title"><h1>Brain Quest</h1><p>Ten tricky puzzles. Don't believe your eyes!</p>
+<div class="scr on" id="title"><div class="hero">🧠✨🎮</div><h1>Brain Quest</h1><p>Thirty tricky puzzles. Don't believe your eyes!</p>
 <button class="b g" id="bp">Play</button><br><button class="b" id="be">Edit Character</button></div>
 
 <div class="scr" id="lvls"><h1 style="font-size:2rem">Choose a level</h1><div id="grid"></div><p>Solve a level to unlock the next one.</p>
@@ -38,7 +57,7 @@ h1{font-size:2.8rem;margin:.3em 0;color:#fff;text-shadow:0 4px 0 #3a7bd5}h2{marg
 <button class="b" id="bh">Hint</button><button class="b r" id="br">Restart</button></div>
 
 <div class="scr" id="done"><h1>You did it!</h1>
-<div class="card"><h2>All 10 levels complete</h2><p>You fed the cat, caught the thief and ran a flawless security inspection. Brain officially tested!</p></div>
+<div class="card"><h2>All 30 levels complete</h2><p>You fed the cat, escaped the dragon, cracked the safe, beat the robot and ran a flawless security inspection. Brain officially tested!</p></div>
 <button class="b g" data-go="lvls">Play again</button><button class="b" data-go="title">Main menu</button></div>
 
 <div class="ov" id="win"><div class="card"><h2>Solved!</h2><p id="wm"></p><button class="b g" id="nx"></button></div></div>
@@ -109,13 +128,21 @@ const SCANNER = {
 };
 
 
+/* =====================================================================
+   BONUS LEVEL (Level 15) CONFIG
+   ===================================================================== */
+const BONUS = {
+  images: ['assets/img1','assets/img2','assets/img3'], // file names WITHOUT the extension: .png .jpg .jpeg .webp .gif are tried automatically
+  link:   ''  // <<< PUT YOUR LINK HERE (example: 'https://example.com'). The "Click Here" button redirects to it.
+};
+
 /* ===================== 2. UTILITIES ===================== */
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const CHAR=Object.assign({},DEFAULT_CHAR);
 try{Object.assign(CHAR,JSON.parse(LS.get('bq_char')||'{}'))}catch(e){}
-let un=Math.min(10,Math.max(1,+LS.get('bq_un')||1)),cur=0,won=false,runId=0,sv=null,AC;
+let un=Math.min(30,Math.max(1,+LS.get('bq_un')||1)),cur=0,won=false,runId=0,sv=null,AC;
 const stage=$('#stage');
 function beep(f=600,d=.12,t='sine',v=.12){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
@@ -267,7 +294,248 @@ const LV=[
  $$('.su').forEach(n=>n.onclick=()=>toast(S[+n.dataset.i][2]));
  drag($('#cuffs'),{end(n){const p=P(n);let b=-1,bd=70;[60,150,250,340].forEach((x,i)=>{const d=Math.hypot(p[0]-x,p[1]-165);if(d<bd){bd=d;b=i}});
   if(b==1){n.style.display='none';win('Busted! Mia confesses: "I was SO hungry!"')}else{if(b>=0)toast(S[b][0]+' has an alibi!');back(n)}}})}},
-/* ---- LEVEL 10 (the last entry in LV) ---- */
+/* ===================== NEW LEVELS 10-19 (Level 15 is the BONUS level) ===================== */
+{t:'Biggest Number',q:'Tap the BIGGEST number!',h:'Look at the value of each number, not at how big it is drawn.',f(){
+ const N=[[9,96],[100,22],[7,58],[42,34]],xs=[55,150,250,345].sort(()=>Math.random()-.5);
+ setScene(gnd('#a8e6a3',250)+N.map((n,i)=>`<g class="nm" data-v="${n[0]}" style="cursor:pointer"><circle cx="${xs[i]}" cy="160" r="38" fill="#000" fill-opacity="0"/><text x="${xs[i]}" y="160" text-anchor="middle" dominant-baseline="central" font-size="${n[1]}" font-weight="900" fill="#e76f51" stroke="#fff" stroke-width="2">${n[0]}</text></g>`).join(''),'#fff3d6');
+ $$('.nm').forEach(n=>n.onclick=()=>{if(won)return;const v=+n.dataset.v;
+  if(v==100){beep(700,.15);win('100 is the biggest number, even when it is drawn tiny!')}
+  else if(v==9)toast('9 is the biggest DRAWING, but it is not the biggest number!');
+  else toast(v+'? Look again!')})}},
+{t:'Green Frog',q:'This sad frog is grey. Paint it GREEN! You only have red, yellow and blue paint.',h:'Paint can be mixed. What colour do you get when you mix blue and yellow?',f(){
+ const run=runId,fr=c=>`<ellipse cx="156" cy="226" rx="20" ry="9" fill="${c}" stroke="#333" stroke-width="3"/><ellipse cx="244" cy="226" rx="20" ry="9" fill="${c}" stroke="#333" stroke-width="3"/><ellipse cx="200" cy="190" rx="52" ry="38" fill="${c}" stroke="#333" stroke-width="3"/><circle cx="172" cy="150" r="17" fill="#fff" stroke="#333" stroke-width="3"/><circle cx="228" cy="150" r="17" fill="#fff" stroke="#333" stroke-width="3"/><circle cx="174" cy="152" r="6" fill="#222"/><circle cx="226" cy="152" r="6" fill="#222"/><path d="M178 200Q200 214 222 200" stroke="#333" stroke-width="3" fill="none"/>`;
+ const can=c=>`<path d="M-17-14H17L14 18H-14Z" fill="#e8e8e8" stroke="#555" stroke-width="2"/><rect x="-15" y="-4" width="30" height="13" fill="${c}"/><ellipse cy="-14" rx="17" ry="5" fill="${c}" stroke="#555" stroke-width="2"/>`;
+ const col={R:'#ef6b6b',Y:'#f4d34a',B:'#5b8ef0',RY:'#f39a3d',BR:'#9b5de5',BY:'#4cc35a'},nm={RY:'orange',BR:'purple'};let mix=[];
+ setScene(gnd('#9ad07a',245)+`<g id="frw">${fr('#d9d9d9')}</g>${D('pr',60,60,can('#e63946'))}${D('py',200,60,can('#ffd23f'))}${D('pb',340,60,can('#3a86ff'))}`,'#e3f6ff');
+ const reset=()=>{mix=[];$('#frw').innerHTML=fr('#d9d9d9');['pr','py','pb'].forEach(i=>{$('#'+i).style.display='';back($('#'+i))})};
+ [['pr','R'],['py','Y'],['pb','B']].forEach(([id,k])=>drag($('#'+id),{end(n){
+  if(dist(n,200,185)<85&&mix.length<2){n.style.display='none';mix.push(k);beep(450+mix.length*150,.15);
+   const key=mix.length==1?k:mix.slice().sort().join('');$('#frw').innerHTML=fr(col[key]);
+   if(mix.length==2){if(key=='BY')win('Ribbit! Blue + yellow makes green!');else{toast('Oops, that made '+nm[key]+'! Let me clean the frog...');setTimeout(()=>{if(run===runId)reset()},1500)}}}
+  else back(n)}}))}},
+{t:'Shake It!',q:'There are coins trapped inside the piggy bank. Get them out!',h:'The slot is too tiny for fingers. How do you empty a piggy bank? Shake it! Drag it up and down, again and again.',f(){
+ const run=runId,pig=`<rect x="-30" y="26" width="16" height="22" rx="6" fill="#ff8fb3" stroke="#c2185b" stroke-width="3"/><rect x="14" y="26" width="16" height="22" rx="6" fill="#ff8fb3" stroke="#c2185b" stroke-width="3"/><path d="M-52 0Q-68-6-60-18" fill="none" stroke="#c2185b" stroke-width="4"/><ellipse rx="52" ry="38" fill="#ffa6c1" stroke="#c2185b" stroke-width="3"/><path d="M-30-32L-22-50L-10-36Z" fill="#ff8fb3" stroke="#c2185b" stroke-width="3"/><ellipse cx="50" cy="4" rx="15" ry="12" fill="#ff8fb3" stroke="#c2185b" stroke-width="3"/><circle cx="46" cy="4" r="2.5" fill="#7a1d3f"/><circle cx="55" cy="4" r="2.5" fill="#7a1d3f"/><circle cx="26" cy="-10" r="4.5" fill="#222"/><rect x="-14" y="-40" width="28" height="7" rx="3.5" fill="#7a1d3f"/>`;
+ setScene(`<rect y="235" width="400" height="65" fill="#c49a6c"/><rect y="228" width="400" height="10" fill="#a87c4f"/>${D('pig',200,160,pig)}`,'#fdf1dc');
+ let shakes=0,dir=0,ext=0,done=false;
+ const hit=()=>{shakes++;beep(280+shakes*50,.07,'square',.06);if(shakes==3)toast('Something jingles inside...');if(shakes>=7&&!done){done=true;coins()}};
+ const coins=()=>{for(let i=0;i<7;i++){const x=150+i*17;sv.insertAdjacentHTML('beforeend',`<g class="cn" id="cn${i}" style="transform:translate(${x}px,190px);transition:transform .7s cubic-bezier(.5,0,1,1) ${i*.1}s"><circle r="9" fill="#ffd23f" stroke="#c98600" stroke-width="2"/><text y="4" text-anchor="middle" font-size="11" font-weight="900" fill="#c98600">$</text></g>`)}
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{for(let i=0;i<7;i++){const e=$('#cn'+i);if(e)e.style.transform=`translate(${150+i*17}px,${i%2?224:218}px)`}}));
+  [0,1,2,3].forEach(k=>setTimeout(()=>beep(900+k*80,.08),k*120));setTimeout(()=>{if(run===runId)win('Cha-ching! Shaken, not stirred.')},1300)};
+ drag($('#pig'),{start(n){dir=0;ext=n._y},move(n){if(done)return;const y=n._y;
+  if(dir===0){if(Math.abs(y-ext)>12){dir=y>ext?1:-1;ext=y}}
+  else if(dir===1){if(y>ext)ext=y;else if(ext-y>22){dir=-1;ext=y;hit()}}
+  else{if(y<ext)ext=y;else if(y-ext>22){dir=1;ext=y;hit()}}},end(n){back(n)}})}},
+{t:'Cheese in the Dark',q:'The mouse wants the cheese, but the maze is pitch black! Walls only appear when you bump into them.',h:'Every wall you bump into stays visible. Learn from your bumps and plan a path to the cheese.',f(){
+ const M=['S.#.....','#.#.###.','#...#...','###.#.##','.......C'],cs=40,ox=40,oy=70,cols=8,rows=5;
+ let g=`<rect x="${ox-6}" y="${oy-6}" width="${cols*cs+12}" height="${rows*cs+12}" rx="10" fill="#0d1328" stroke="#5b6bbf" stroke-width="3"/>`;
+ for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){g+=M[r][c]=='#'?`<rect id="w${c}_${r}" x="${ox+c*cs+2}" y="${oy+r*cs+2}" width="${cs-4}" height="${cs-4}" rx="5" fill="#ff7675" stroke="#c0392b" stroke-width="2" style="opacity:0;transition:opacity .2s"/>`:`<circle cx="${ox+c*cs+cs/2}" cy="${oy+r*cs+cs/2}" r="1.6" fill="#2e3b6e"/>`}
+ const mouse='<circle cx="-8" cy="-9" r="6" fill="#d8dce2" stroke="#555" stroke-width="2"/><circle cx="5" cy="-10" r="6" fill="#d8dce2" stroke="#555" stroke-width="2"/><path d="M-12 4Q-26 8-23-3" fill="none" stroke="#e57373" stroke-width="2.5"/><ellipse rx="13" ry="10" fill="#b8bec7" stroke="#555" stroke-width="2"/><circle cx="6" cy="-2" r="1.8" fill="#222"/><circle cx="12" cy="2" r="2.2" fill="#e57373"/>';
+ const cheese='<path d="M-16 12H16V-4L-16-14Z" fill="#ffd23f" stroke="#c98600" stroke-width="2"/><circle cx="-4" cy="3" r="3" fill="#e0a800"/><circle cx="8" cy="6" r="2" fill="#e0a800"/>';
+ setScene(`<text x="200" y="38" text-anchor="middle" font-size="16" font-weight="700" fill="#9fb0ff">It is dark in here...</text>${g}<g transform="translate(${ox+7*cs+20} ${oy+4*cs+20})">${cheese}</g>${D('mouse',ox+20,oy+20,mouse)}`,'#141b36');
+ let dead=false,pp=null,fin=false,bumps=0;
+ const bump=(c,r,out)=>{dead=true;bumps++;beep(140,.25,'sawtooth');if(out)toast('Stay inside the maze!');else{const w=$(`#w${c}_${r}`);if(w)w.style.opacity=1;toast(bumps>2?'Ouch! Another wall! You are mapping it out...':'Ouch! A hidden wall!')}};
+ drag($('#mouse'),{start(n){dead=false;pp=P(n)},move(n){if(dead||fin){if(!fin)back(n);return}
+  const p=P(n),dx=p[0]-pp[0],dy=p[1]-pp[1],st=Math.max(1,Math.ceil(Math.hypot(dx,dy)/5));
+  for(let k=1;k<=st;k++){const x=pp[0]+dx*k/st,y=pp[1]+dy*k/st,c=Math.floor((x-ox)/cs),r=Math.floor((y-oy)/cs),out=c<0||r<0||c>=cols||r>=rows;
+   if(out||M[r][c]=='#'){bump(c,r,out);back(n);return}}
+  pp=p;if(Math.floor((p[0]-ox)/cs)==7&&Math.floor((p[1]-oy)/cs)==4){fin=true;win('Squeak! Cheesy victory!')}},
+  end(n){if(!fin)back(n)}})}},
+{t:'Copy the Lights',q:'Watch the lights carefully, then repeat the pattern!',h:'Say the colours out loud as they flash. There are four lights, in a fixed order.',f(){
+ const run=runId,cols=['#e63946','#ffd23f','#2ec4b6','#3a86ff'],tones=[262,330,392,523],xy=[[70,44],[220,44],[70,156],[220,156]];
+ const seq=Array.from({length:4},()=>Math.random()*4|0);if(seq.every(v=>v==seq[0]))seq[3]=(seq[0]+1)%4;
+ setScene(xy.map((p,i)=>`<rect id="p${i}" x="${p[0]}" y="${p[1]}" width="110" height="100" rx="18" fill="${cols[i]}" stroke="#fff" stroke-width="3" style="opacity:.4;cursor:pointer;transition:opacity .08s"/>`).join('')+'<text id="stx" x="200" y="282" text-anchor="middle" font-size="18" font-weight="700" fill="#fff"></text>','#1b1f3b');
+ let inp=false,idx=0;const st=t=>{const e=$('#stx');if(e)e.textContent=t},lit=(i,o)=>{const e=$('#p'+i);if(e)e.style.opacity=o?1:.4};
+ const flash=(i,ms=420)=>{lit(i,1);beep(tones[i],ms/1000,'sine',.15);setTimeout(()=>lit(i,0),ms)};
+ const replay=()=>{inp=false;idx=0;st('Watch...');seq.forEach((v,k)=>setTimeout(()=>{if(run===runId)flash(v)},900+k*650));setTimeout(()=>{if(run===runId){inp=true;st('Your turn!')}},900+seq.length*650)};
+ [0,1,2,3].forEach(i=>$('#p'+i).onpointerdown=e=>{e.preventDefault();if(!inp||won)return;flash(i,250);
+  if(seq[idx]==i){idx++;if(idx==seq.length){inp=false;st('Perfect!');setTimeout(()=>{if(run===runId)win('Perfect memory!')},500)}}
+  else{inp=false;st('Wrong! Watch again...');beep(150,.4,'sawtooth');setTimeout(()=>{if(run===runId)replay()},1000)}});
+ replay()}},
+/* ---- LEVEL 15: BONUS LEVEL (images and link are set in the BONUS block at the top of the script) ---- */
+{t:'Bonus Level!',q:'Bonus level! Pick the one you like best. There are no wrong answers!',h:'Just follow your heart. Every choice is a winner!',f(){
+ const B=BONUS,EX=['png','jpg','jpeg','webp','gif'];
+ $('#ttl').textContent=`${cur+1}. ⭐ Bonus Level ⭐`;
+ stage.innerHTML=`<div style="display:flex;gap:10px;justify-content:center">${B.images.map((s,i)=>`<button class="pk" data-i="${i}" aria-label="Choice ${i+1}"><img alt="Choice ${i+1}"></button>`).join('')}</div>`;
+ $$('#stage .pk img').forEach((im,i)=>{const s=B.images[i],list=s.split('/').pop().includes('.')?[s]:EX.map(e=>s+'.'+e);let k=0;
+  im.onerror=()=>{k++;if(k<list.length)im.src=list[k];else{im.onerror=null;im.src='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160"><rect width="120" height="160" fill="#cfd8ff"/><text x="60" y="86" text-anchor="middle" font-size="20" font-family="sans-serif" fill="#456">img${i+1}</text></svg>`)}};
+  im.src=list[0]});
+ $$('#stage .pk').forEach(b=>b.onclick=()=>{if(won)return;won=true;LS.set('bq_pick',b.dataset.i);
+  beep(523,.12);setTimeout(()=>beep(784,.25),130);confetti();unlock();$('#bar i').style.width=(cur+1)/LV.length*100+'%';
+  stage.innerHTML=`<div style="padding:30px 10px;font-size:1.5rem;font-weight:800;line-height:1.6">Wanna see your character in action?<br><a id="go" href="${esc(B.link||'#')}" style="color:#fff;background:#52d273;box-shadow:0 5px 0 #2b9c4b;padding:10px 24px;border-radius:16px;text-decoration:none;display:inline-block;margin-top:10px">Click Here ▶</a></div>`;
+  $('#go').onclick=e=>{if(!B.link){e.preventDefault();toast('The link is coming soon!')}};
+  $('#extra').innerHTML='<button class="b" id="cont">Continue to the next level ▶</button>';$('#cont').onclick=()=>play(cur+1)})}},
+{t:'Two Doors',q:'One door hides a treasure, the other hides a dragon. Exactly ONE of the two signs is telling the truth. Pick a door!',h:'Suppose the sign that says "treasure AND dragon" is true. Then the other sign would be true as well, but only one sign can be true. So that sign must be a lie.',f(){
+ const run=runId,A=['The treasure is in','this room AND a dragon','is in the other room.'],Bt=['One room has a treasure','and one room has','a dragon.'],aSide=Math.random()<.5?0:1,good=1-aSide,xs=[25,225];
+ const chest='<rect x="-28" y="-6" width="56" height="36" rx="4" fill="#a0522d" stroke="#5a3a1a" stroke-width="3"/><path d="M-28-6Q0-34 28-6Z" fill="#c8914f" stroke="#5a3a1a" stroke-width="3"/><rect x="-6" y="0" width="12" height="14" rx="2" fill="gold" stroke="#c98600" stroke-width="2"/><path d="M-36-30L-32-20M36-30L32-20M0-44V-34" stroke="#ffd23f" stroke-width="4" stroke-linecap="round"/>';
+ const dragon='<ellipse rx="34" ry="30" fill="#4cbc5c" stroke="#1d6b2b" stroke-width="3"/><path d="M-22-24L-30-44L-12-30ZM22-24L30-44L12-30Z" fill="#eee" stroke="#555" stroke-width="2"/><circle cx="-12" cy="-6" r="6" fill="#fff"/><circle cx="12" cy="-6" r="6" fill="#fff"/><circle cx="-12" cy="-5" r="3" fill="#c00"/><circle cx="12" cy="-5" r="3" fill="#c00"/><path d="M-16 12L-8 20L0 12L8 20L16 12" fill="#fff" stroke="#333" stroke-width="2"/><path d="M-8 28Q0 62 10 30Q18 46 16 26Z" fill="#ff9f1c"/>';
+ setScene('<rect y="246" width="400" height="54" fill="#b9a98a"/>'+[0,1].map(i=>{const x=xs[i],tx=i==aSide?A:Bt;
+  return `<g id="dr${i}" style="cursor:pointer"><rect x="${x}" y="12" width="150" height="62" rx="8" fill="#fffbe8" stroke="#8a5a2b" stroke-width="3"/>${tx.map((l,k)=>`<text x="${x+75}" y="${33+k*15}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3b2a00">${l}</text>`).join('')}<path d="M${x} 246V130Q${x} 96 ${x+34} 96H${x+116}Q${x+150} 96 ${x+150} 130V246Z" fill="#8a5a2b" stroke="#5a3a1a" stroke-width="4"/><path d="M${x+50} 100V246M${x+100} 100V246" stroke="#5a3a1a" stroke-width="2" opacity=".5"/><circle cx="${x+126}" cy="190" r="7" fill="gold"/><text x="${x+75}" y="180" text-anchor="middle" font-size="40" font-weight="900" fill="#fff" opacity=".85">${i+1}</text></g>`}).join(''),'#e9dfc8');
+ [0,1].forEach(i=>$('#dr'+i).onclick=()=>{if(won)return;const x=xs[i],ok=i==good;
+  $('#dr'+i).innerHTML=`<rect x="${x}" y="96" width="150" height="150" rx="10" fill="#2b1d12"/><g transform="translate(${x+75} 180)">${ok?chest:dragon}</g>`;
+  if(ok)win('Treasure! The sign with "treasure AND dragon" had to be the lie.');
+  else{beep(120,.5,'sawtooth');toast('ROAR! A dragon! The doors get shuffled...');setTimeout(()=>{if(run===runId)play(cur)},1700)}})}},
+{t:'Perfect Drop',q:'Tap to drop the ball into the basket. Make 3 perfect drops in a row!',h:'Tap when the ball is right above the basket. It gets faster after every hit, and a miss resets your streak.',f(){
+ const run=runId;let hits=0,t=Math.random()*6,ph=0,x=200,y=46,vy=0,ok=false,res=false,last=performance.now();
+ setScene('<rect y="256" width="400" height="44" fill="#9ad07a"/><path d="M20 30H380" stroke="#7c8a99" stroke-width="6" stroke-linecap="round"/><g id="bl"><circle r="11" fill="#e63946" stroke="#8c1f32" stroke-width="3"/><circle cx="-3" cy="-4" r="3" fill="#fff" opacity=".6"/></g><path d="M168 212H232L224 254H176Z" fill="#c8914f" stroke="#7a4a1a" stroke-width="3"/><path d="M178 226H222M180 240H220" stroke="#7a4a1a" stroke-width="2"/><text id="ht" x="200" y="290" text-anchor="middle" font-size="16" font-weight="700" fill="#23305a">Streak: 0 / 3</text>','#d7f1ff');
+ const ht=()=>{const e=$('#ht');if(e)e.textContent=`Streak: ${hits} / 3`},reset=()=>{ph=0;y=46;vy=0;res=false};
+ const drop=()=>{if(ph==0&&!won){ph=1;vy=0;res=false}};
+ sv.onpointerdown=e=>{e.preventDefault();drop()};
+ $('#extra').innerHTML='<button class="b g" id="dp">DROP ⬇</button>';$('#dp').onclick=drop;
+ const tick=now=>{if(run!==runId)return;const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(ph==0){t+=dt*(1.5+hits*.9);x=200+150*Math.sin(t)}
+  else if(ph==1){vy+=1100*dt;y+=vy*dt;if(y>=198&&!res){res=true;ok=Math.abs(x-200)<=26}
+   const fl=ok?238:262;
+   if(y>=fl){y=fl;ph=2;
+    if(ok){hits++;ht();beep(500+hits*150,.15);if(hits>=3)setTimeout(()=>{if(run===runId)win('Nothing but net! Three in a row!')},500);else setTimeout(()=>{if(run===runId)reset()},500)}
+    else{hits=0;ht();beep(150,.3,'sawtooth');toast('Missed! Your streak is reset.');setTimeout(()=>{if(run===runId)reset()},700)}}}
+  const b=$('#bl');if(b)b.setAttribute('transform',`translate(${x} ${y})`);requestAnimationFrame(tick)};
+ requestAnimationFrame(tick)}},
+{t:"Don't Press It",q:'Whatever you do, do NOT press the big red button!',h:'Sometimes the best move is no move at all. Just wait, and ignore the distractions.',f(){
+ const run=runId,TOTAL=8.5,taunts=["I said DON'T!",'Why did you press it?!','Seriously? Try again.','Patience, young one.','You can do it. Just. Wait.'],
+ pops=[{at:2.5,x:14,y:64,c:'#2ec4b6',a:'FREE ICE CREAM!',b:'Tap to claim'},{at:4.6,x:236,y:64,c:'#3a86ff',a:'Skip the wait',b:'Tap here >>'},{at:6.3,x:120,y:238,c:'#f4a261',a:'VIRUS DETECTED!',b:'Tap to fix'}],
+ msgs=[[0,''],[1.8,'Tempting, isn\'t it?'],[4,'Still here?'],[6,'Almost there...']];
+ let t0=performance.now(),ti=0,shown=[false,false,false];
+ setScene(`<text id="mg" x="200" y="42" text-anchor="middle" font-size="18" font-weight="700" fill="#23305a"></text><g id="btn" style="cursor:pointer"><ellipse cx="200" cy="208" rx="84" ry="24" fill="#8c1f32"/><path d="M116 190V172Q116 112 200 112Q284 112 284 172V190Q284 218 200 218Q116 218 116 190Z" fill="#e63946" stroke="#8c1f32" stroke-width="4"/><text x="200" y="162" text-anchor="middle" font-size="22" font-weight="900" fill="#fff">DON'T</text><text x="200" y="190" text-anchor="middle" font-size="22" font-weight="900" fill="#fff">PRESS!</text></g><g id="pops"></g>`,'#fff3d6');
+ const pressed=m=>{toast(m);beep(200,.2,'square');t0=performance.now();$('#pops').innerHTML='';shown=[false,false,false];ti++};
+ $('#btn').onclick=()=>{if(!won)pressed(taunts[ti%taunts.length])};
+ const tick=now=>{if(run!==runId||won)return;const e=(now-t0)/1000;
+  const m=msgs.filter(v=>e>=v[0]).pop();const mg=$('#mg');if(mg)mg.textContent=m?m[1]:'';
+  pops.forEach((p,i)=>{if(e>=p.at&&!shown[i]){shown[i]=true;$('#pops').insertAdjacentHTML('beforeend',`<g class="pp" data-i="${i}" style="cursor:pointer"><rect x="${p.x}" y="${p.y}" width="150" height="46" rx="10" fill="${p.c}" stroke="#fff" stroke-width="3"/><text x="${p.x+75}" y="${p.y+20}" text-anchor="middle" font-size="13" font-weight="900" fill="#fff">${p.a}</text><text x="${p.x+75}" y="${p.y+36}" text-anchor="middle" font-size="11" fill="#fff">${p.b}</text></g>`);
+   const g=$('#pops').lastChild;g.onclick=()=>{if(!won)pressed('A trap! You fell for it!')}}});
+  if(e>=TOTAL){win('You did absolutely nothing, perfectly!');return}requestAnimationFrame(tick)};
+ requestAnimationFrame(tick)}},
+{t:'Balance the Scale',q:'Make the scale perfectly balanced! The mystery block weighs 7 kg.',h:'Weights can go on either pan. Which of your weights add up to 7?',f(){
+ const W={w2:2,w3:3,w4:4,w6:6},pan={w2:null,w3:null,w4:null,w6:null},BLK=7,half=110,py=126;let drg=null,pc={L:[90,174],R:[310,174]};
+ const wt=(v,c)=>`<path d="M-17 13L-11-10H11L17 13Z" fill="${c}" stroke="#222" stroke-width="2"/><path d="M-6-10Q0-22 6-10" fill="none" stroke="#222" stroke-width="3"/><text y="8" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">${v}</text>`;
+ setScene(gnd('#d9c3a0',258)+`<path d="M176 262L200 ${py}L224 262Z" fill="#7c8a99"/><g id="pans"></g><line id="bm" stroke="#5a3a1a" stroke-width="9" stroke-linecap="round" x1="90" y1="${py}" x2="310" y2="${py}"/><circle cx="200" cy="${py}" r="9" fill="#e63946"/><text id="bal" x="200" y="34" text-anchor="middle" font-size="16" font-weight="700" fill="#23305a"></text>${D('w2',55,276,wt(2,'#e76f51'))}${D('w3',120,276,wt(3,'#2a9d8f'))}${D('w4',280,276,wt(4,'#6c5ce7'))}${D('w6',345,276,wt(6,'#e63946'))}`,'#eaf6ff');
+ const sum=s=>Object.keys(pan).reduce((a,k)=>a+(pan[k]==s?W[k]:0),0);
+ const place=(n,x,y)=>{n._x=x-n._b[0];n._y=y-n._b[1];n.setAttribute('transform',`translate(${n._x} ${n._y})`)};
+ function render(){const L=BLK+sum('L'),R=sum('R'),th=Math.max(-16,Math.min(16,(R-L)*3.2))*Math.PI/180,c=Math.cos(th),s=Math.sin(th);
+  const lx=200-half*c,ly=py-half*s,rx=200+half*c,ry=py+half*s,bm=$('#bm');
+  bm.setAttribute('x1',lx);bm.setAttribute('y1',ly);bm.setAttribute('x2',rx);bm.setAttribute('y2',ry);pc={L:[lx,ly+46],R:[rx,ry+46]};
+  const dish=(ex,ey)=>`<path d="M${ex} ${ey}L${ex-40} ${ey+46}M${ex} ${ey}L${ex+40} ${ey+46}" stroke="#555" stroke-width="2"/><rect x="${ex-46}" y="${ey+46}" width="92" height="8" rx="4" fill="#8a5a2b"/>`;
+  $('#pans').innerHTML=dish(lx,ly)+dish(rx,ry)+`<g transform="translate(${lx} ${ly+46-20})"><rect x="-24" y="-20" width="48" height="40" rx="5" fill="#555" stroke="#222" stroke-width="2"/><text y="6" text-anchor="middle" font-size="15" font-weight="900" fill="#fff">7 kg</text></g>`;
+  ['L','R'].forEach(sd=>{const ks=Object.keys(pan).filter(k=>pan[k]==sd);ks.forEach((k,i)=>place($('#'+k),pc[sd][0]+(i-(ks.length-1)/2)*32,pc[sd][1]-(sd=='L'?40:0)-13))});
+  Object.keys(pan).forEach(k=>{if(pan[k]==null&&k!=drg)back($('#'+k))});
+  $('#bal').textContent=`Left: ${L} kg    Right: ${R} kg`;return L==R&&R>0}
+ render();
+ Object.keys(W).forEach(k=>drag($('#'+k),{start(n){pan[k]=null;drg=k;render()},end(n){drg=null;const p=P(n),dl=Math.hypot(p[0]-pc.L[0],p[1]-(pc.L[1]-20)),dr=Math.hypot(p[0]-pc.R[0],p[1]-(pc.R[1]-20));
+  pan[k]=Math.min(dl,dr)<70?(dl<dr?'L':'R'):null;beep(400,.08);if(render()&&!won)setTimeout(()=>win('Perfectly balanced, as all things should be!'),500)}}))}},
+/* ===================== NEW LEVELS 20-29 (tougher, more interactive) ===================== */
+{t:'Lights Out',q:'Turn every light OFF! Tapping a square flips it AND its four neighbours.',h:'Work from the top row down: pressing the square BELOW a lit light switches that light off.',f(){
+ const n=4,cs=62,ox=76,oy=18,st=Array(16).fill(0);let mv=0;
+ const press=i=>{const r=i/n|0,c=i%n;[[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,b])=>{const rr=r+a,cc=c+b;if(rr>=0&&rr<n&&cc>=0&&cc<n)st[rr*n+cc]^=1})};
+ do{st.fill(0);for(let k=0;k<8;k++)press(Math.random()*16|0)}while(st.filter(v=>v).length<5);
+ setScene(Array.from({length:16},(_,i)=>`<rect id="lc${i}" x="${ox+(i%n)*cs+3}" y="${oy+(i/n|0)*cs+3}" width="${cs-6}" height="${cs-6}" rx="10" stroke="#fff" stroke-width="3" style="cursor:pointer;transition:fill .12s"/>`).join('')+'<text id="lm" x="200" y="289" text-anchor="middle" font-size="16" font-weight="700" fill="#fff"></text>','#1b1f3b');
+ const paint=()=>{st.forEach((v,i)=>$('#lc'+i).setAttribute('fill',v?'#ffd23f':'#2b3566'));$('#lm').textContent=`Lights on: ${st.filter(v=>v).length}    Moves: ${mv}`};
+ paint();
+ for(let i=0;i<16;i++)$('#lc'+i).onclick=()=>{if(won)return;press(i);mv++;beep(300+i*20,.06);paint();if(st.every(v=>!v))setTimeout(()=>win('Lights out! Everything is dark.'),300)}}},
+{t:'Tower of Hanoi',q:'Move the whole tower to the RIGHT peg. One disc at a time, and never put a big disc on a small one!',h:'Tap a peg to lift its top disc, then tap another peg to drop it. To move 4 discs, first move the top 3 to the middle peg.',f(){
+ const px=[70,200,330],base=250,dh=24,cols=['#e63946','#f4a261','#2ec4b6','#6c5ce7'],pegs=[[3,2,1,0],[],[]];let sel=-1,mv=0;
+ setScene(`<rect x="20" y="${base}" width="360" height="12" rx="6" fill="#8a5a2b"/>`+px.map(x=>`<rect x="${x-5}" y="90" width="10" height="${base-90}" rx="5" fill="#a87c4f"/>`).join('')+'<g id="dk"></g>'+px.map((x,i)=>`<rect id="pz${i}" x="${x-62}" y="40" width="124" height="${base-30}" fill="#000" fill-opacity="0" style="cursor:pointer"/>`).join('')+'<text id="hm" x="200" y="288" text-anchor="middle" font-size="16" font-weight="700" fill="#23305a"></text>','#e8f4ff');
+ const draw=()=>{let h='';pegs.forEach((p,i)=>p.forEach((d,k)=>{const w=44+d*22,top=sel==i&&k==p.length-1,y=top?44:base-dh*(k+1);h+=`<rect x="${px[i]-w/2}" y="${y}" width="${w}" height="${dh-3}" rx="9" fill="${cols[d]}" stroke="#222" stroke-opacity=".35" stroke-width="2"/>`}));$('#dk').innerHTML=h;$('#hm').textContent=`Moves: ${mv}   (best possible: 15)`};
+ draw();
+ [0,1,2].forEach(i=>$('#pz'+i).onclick=()=>{if(won)return;
+  if(sel<0){if(pegs[i].length){sel=i;beep(500,.06)}}
+  else if(sel==i){sel=-1}
+  else{const d=pegs[sel][pegs[sel].length-1],t=pegs[i];
+   if(t.length&&t[t.length-1]<d){toast('A big disc cannot sit on a smaller one!');beep(150,.2,'sawtooth')}
+   else{pegs[sel].pop();t.push(d);mv++;beep(400,.08)}
+   sel=-1}
+  draw();if(pegs[2].length==4)setTimeout(()=>win(`Tower moved in ${mv} moves!`),300)})}},
+{t:'Slide Puzzle',q:'Put the tiles in order, 1 to 8, with the empty space in the bottom-right corner.',h:'Solve the top row first, then the second row, then finish the last two rows. Only tiles touching the empty space can slide.',f(){
+ const cs=84,ox=74,oy=14;let b=[1,2,3,4,5,6,7,8,0],mv=0;
+ const nb=z=>{const r=z/3|0,c=z%3,o=[];if(r>0)o.push(z-3);if(r<2)o.push(z+3);if(c>0)o.push(z-1);if(c<2)o.push(z+1);return o};
+ const solved=()=>b.every((v,i)=>v==(i+1)%9);
+ do{b=[1,2,3,4,5,6,7,8,0];let z=8,prev=-1;for(let k=0;k<90;k++){const o=nb(z).filter(x=>x!=prev),t=o[Math.random()*o.length|0];b[z]=b[t];b[t]=0;prev=z;z=t}}while(solved());
+ setScene([1,2,3,4,5,6,7,8].map(v=>`<g id="s${v}" style="cursor:pointer;transition:transform .14s"><rect width="${cs-6}" height="${cs-6}" rx="12" fill="hsl(${v*40} 75% 62%)" stroke="#fff" stroke-width="3"/><text x="${(cs-6)/2}" y="${(cs-6)/2}" text-anchor="middle" dominant-baseline="central" font-size="36" font-weight="900" fill="#fff" stroke="#0003" stroke-width="1">${v}</text></g>`).join('')+'<text id="sm" x="200" y="289" text-anchor="middle" font-size="16" font-weight="700" fill="#23305a"></text>','#eef3ff');
+ const lay=()=>{[1,2,3,4,5,6,7,8].forEach(v=>{const i=b.indexOf(v);$('#s'+v).style.transform=`translate(${ox+(i%3)*cs+3}px,${oy+(i/3|0)*cs+3}px)`});$('#sm').textContent='Moves: '+mv};
+ lay();
+ [1,2,3,4,5,6,7,8].forEach(v=>$('#s'+v).onclick=()=>{if(won)return;const i=b.indexOf(v),z=b.indexOf(0);
+  if(nb(z).includes(i)){b[z]=v;b[i]=0;mv++;beep(350,.05);lay();if(solved())setTimeout(()=>win(`Solved in ${mv} moves!`),400)}else beep(150,.08,'square',.05)})}},
+{t:'Whack-a-Mole',q:'Whack 15 moles in 20 seconds. Do NOT touch the bombs!',h:'Bombs are black with a lit fuse. The moles get quicker as you score, so stay focused.',f(){
+ const run=runId,GOAL=15,TIME=20,xs=[80,200,320],ys=[100,175,250],hole=Array(9).fill(null);let sc=0,over=false,t0=performance.now();
+ const mole='<circle r="26" fill="#8b5a2b" stroke="#4a2f1b" stroke-width="3"/><circle cx="-9" cy="-6" r="5" fill="#fff"/><circle cx="9" cy="-6" r="5" fill="#fff"/><circle cx="-9" cy="-6" r="2.5" fill="#222"/><circle cx="9" cy="-6" r="2.5" fill="#222"/><ellipse cy="7" rx="9" ry="7" fill="#f4a8b0"/>';
+ const bomb='<circle r="24" fill="#222" stroke="#000" stroke-width="3"/><path d="M8-22Q16-34 24-28" stroke="#c98600" stroke-width="3" fill="none"/><circle cx="25" cy="-29" r="6" fill="#ff7a1a"/><circle cx="-8" cy="-8" r="5" fill="#fff" opacity=".35"/>';
+ setScene(Array.from({length:9},(_,i)=>{const x=xs[i%3],y=ys[i/3|0];return `<ellipse cx="${x}" cy="${y+24}" rx="40" ry="13" fill="#4a2f1b"/><g id="m${i}" transform="translate(${x} ${y})" style="display:none;cursor:pointer"><g id="mo${i}">${mole}</g><g id="bo${i}">${bomb}</g></g>`}).join('')+'<text id="wt" x="200" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#23305a"></text>','#b8e6a0');
+ const upd=()=>{const e=$('#wt');if(e)e.textContent=`Moles: ${sc} / ${GOAL}     Time: ${Math.max(0,Math.ceil(TIME-(performance.now()-t0)/1000))}`};
+ const hide=i=>{if(hole[i]){clearTimeout(hole[i].to);hole[i]=null}const e=$('#m'+i);if(e)e.style.display='none'};
+ const stop=()=>{over=true;for(let i=0;i<9;i++)hide(i)};
+ const lose=m=>{stop();toast(m);beep(120,.5,'sawtooth');setTimeout(()=>{if(run===runId)play(cur)},1500)};
+ const spawn=()=>{if(over||run!==runId)return;const free=[...Array(9).keys()].filter(i=>!hole[i]);
+  if(free.length){const i=free[Math.random()*free.length|0],bm=Math.random()<.28;$('#mo'+i).style.display=bm?'none':'';$('#bo'+i).style.display=bm?'':'none';$('#m'+i).style.display='';
+   hole[i]={bm,to:setTimeout(()=>hide(i),Math.max(520,1000-sc*30))}}
+  setTimeout(spawn,Math.max(380,700-sc*18))};
+ for(let i=0;i<9;i++)$('#m'+i).onpointerdown=e=>{e.preventDefault();if(over||!hole[i])return;
+  if(hole[i].bm){lose('BOOM! You hit a bomb!');return}
+  sc++;hide(i);beep(500+sc*20,.07);upd();if(sc>=GOAL){stop();win('Mole-ified! 15 whacked!')}};
+ const tick=()=>{if(over||run!==runId)return;upd();if(performance.now()-t0>=TIME*1000){lose(`Time is up! You got ${sc} of ${GOAL}.`);return}requestAnimationFrame(tick)};
+ upd();setTimeout(spawn,500);requestAnimationFrame(tick)}},
+{t:'Colour Clash',q:'Tap the colour of the INK, not what the word says! Get 8 in a row, and be quick!',h:'Ignore the word completely. Look only at the colour it is painted in.',f(){
+ const run=runId,C=[['RED','#e63946'],['BLUE','#3a86ff'],['GREEN','#2ec4b6'],['YELLOW','#ffb703']],NEED=8;let streak=0,ink=0,t0=0,lim=2.4,alive=false;
+ setScene('<text id="cs" x="200" y="34" text-anchor="middle" font-size="18" font-weight="700" fill="#fff"></text><text id="cw" x="200" y="112" text-anchor="middle" dominant-baseline="central" font-size="64" font-weight="900"></text><rect x="50" y="166" width="300" height="10" rx="5" fill="#fff" opacity=".2"/><rect id="cb" x="50" y="166" width="300" height="10" rx="5" fill="#52d273"/>'+C.map((c,i)=>`<circle id="kb${i}" cx="${80+i*80}" cy="232" r="30" fill="${c[1]}" stroke="#fff" stroke-width="4" style="cursor:pointer"/>`).join(''),'#23305a');
+ const upd=()=>{$('#cs').textContent=`In a row: ${streak} / ${NEED}`};
+ const next=()=>{if(run!==runId||won)return;ink=Math.random()*4|0;let w;do{w=Math.random()*4|0}while(w==ink);const e=$('#cw');e.textContent=C[w][0];e.setAttribute('fill',C[ink][1]);lim=Math.max(1.3,2.4-streak*.14);t0=performance.now();alive=true;upd()};
+ const fail=m=>{alive=false;streak=0;toast(m);beep(150,.3,'sawtooth');upd();setTimeout(next,800)};
+ C.forEach((c,i)=>$('#kb'+i).onpointerdown=e=>{e.preventDefault();if(!alive||won)return;alive=false;
+  if(i==ink){streak++;beep(400+streak*60,.08);upd();if(streak>=NEED)setTimeout(()=>win('Your brain beat the Stroop effect!'),250);else setTimeout(next,250)}
+  else fail('Wrong colour! Streak lost.')});
+ const tick=now=>{if(run!==runId||won)return;if(alive){const f=(now-t0)/1000/lim;$('#cb').setAttribute('width',Math.max(0,300*(1-f)));if(f>=1)fail('Too slow! Streak lost.')}requestAnimationFrame(tick)};
+ upd();setTimeout(next,500);requestAnimationFrame(tick)}},
+{t:'Crack the Safe',q:'Crack the 3-digit code using the five clues!',h:'Only ONE code fits all five clues. Start with the clue that says nothing is correct: cross those digits out.',f(){
+ const CL=[['6 8 2','One number is correct and well placed'],['6 1 4','One number is correct but wrongly placed'],['2 0 6','Two numbers are correct but wrongly placed'],['7 3 8','Nothing is correct'],['3 8 0','One number is correct but wrongly placed']],dg=[0,0,0];
+ stage.innerHTML=`<div style="text-align:left;max-width:440px;margin:0 auto">${CL.map(c=>`<div style="display:flex;align-items:center;gap:12px;padding:6px 4px;border-bottom:1px solid #0001"><b style="font:700 1.4rem monospace;letter-spacing:.2em;background:#23305a;color:#fff;border-radius:8px;padding:2px 10px;white-space:nowrap">${c[0]}</b><span>${c[1]}</span></div>`).join('')}</div><div id="dials" style="display:flex;justify-content:center;gap:14px;margin:12px 0 2px">${[0,1,2].map(i=>`<div><button class="b" data-d="${i}" data-s="1" style="padding:4px 18px;margin:2px">▲</button><div id="dg${i}" style="font:900 2.6rem monospace;background:#23305a;color:#ffd23f;border-radius:12px;padding:2px 0;width:64px;margin:0 auto">0</div><button class="b" data-d="${i}" data-s="-1" style="padding:4px 18px;margin:2px">▼</button></div>`).join('')}</div><button class="b g" id="opn">Open Safe</button>`;
+ $('#dials').onclick=e=>{const b=e.target.closest('button');if(!b||won)return;const i=+b.dataset.d;dg[i]=(dg[i]+ +b.dataset.s+10)%10;$('#dg'+i).textContent=dg[i];beep(300+dg[i]*40,.05)};
+ $('#opn').onclick=()=>{if(won)return;if(dg.join('')=='042'){beep(800,.2);win('Click! The safe swings open: the code was 042.')}else{beep(140,.3,'sawtooth');toast('Click... wrong code. Check every clue!')}}}},
+{t:'Rock Fall',q:'Dodge the falling rocks for 12 seconds! Slide your finger or mouse left and right.',h:'Stay calm and keep drifting toward the gaps. The rocks get faster and more frequent over time.',f(){
+ const run=runId,DUR=12;let px=200,rocks=[],t0=performance.now(),last=t0,spT=0,dead=false;
+ setScene('<rect y="262" width="400" height="38" fill="#9c6b3f"/><rect x="20" y="10" width="360" height="8" rx="4" fill="#23305a" opacity=".25"/><rect id="tf" x="20" y="10" width="0" height="8" rx="4" fill="#52d273"/><g id="rk"></g><g id="pl" transform="translate(200 244)"><circle r="16" fill="#f1c27d" stroke="#333" stroke-width="2"/><circle cx="-5" cy="-3" r="2" fill="#222"/><circle cx="5" cy="-3" r="2" fill="#222"/><path d="M-5 4Q0 8 5 4" stroke="#222" fill="none"/><rect x="-10" y="14" width="20" height="10" rx="3" fill="#3a86ff"/></g>','#cfeaff');
+ sv.onpointermove=sv.onpointerdown=e=>{if(!dead)px=Math.max(18,Math.min(382,pt(e).x))};
+ const tick=now=>{if(run!==runId)return;const dt=Math.min(.05,(now-last)/1000);last=now;const el=(now-t0)/1000;
+  if(!dead){spT-=dt;if(spT<=0){const big=Math.random()<.2;rocks.push({x:20+Math.random()*360,y:-20,r:big?26:14,v:150+el*18+Math.random()*60});spT=Math.max(.2,.55-el*.028)}
+   rocks.forEach(r=>r.y+=r.v*dt);rocks=rocks.filter(r=>r.y<320);
+   if(rocks.some(r=>Math.hypot(r.x-px,r.y-244)<r.r+12)){dead=true;beep(120,.5,'sawtooth');toast('Ouch! A rock hit you!');setTimeout(()=>{if(run===runId)play(cur)},1100)}
+   else if(el>=DUR){win('Dodged everything! Not a scratch.');return}}
+  $('#rk').innerHTML=rocks.map(r=>`<circle cx="${r.x.toFixed(1)}" cy="${r.y.toFixed(1)}" r="${r.r}" fill="#8d949c" stroke="#5d636b" stroke-width="3"/>`).join('');
+  $('#pl').setAttribute('transform',`translate(${px} 244)`);$('#tf').setAttribute('width',Math.min(360,360*el/DUR));requestAnimationFrame(tick)};
+ requestAnimationFrame(tick)}},
+{t:'Mirror Maze',q:'Your controls are MIRRORED! Hold and drag to guide the ball to the star. Avoid the lava!',h:'When you drag RIGHT the ball goes LEFT, and when you drag UP the ball goes DOWN. Go slowly and time the lava orb.',f(){
+ const run=runId,R=9,hz=[[90,0,40,190],[190,110,40,190],[290,0,40,190]],S=[36,250],G=[366,250],t0=performance.now(),cl=(v,a,b)=>Math.max(a,Math.min(b,v));let b=[...S],last=null,dead=false,oy=150;
+ setScene(`<circle cx="${S[0]}" cy="${S[1]}" r="20" fill="#52d273" opacity=".4"/>${hz.map(h=>`<rect x="${h[0]}" y="${h[1]}" width="${h[2]}" height="${h[3]}" rx="6" fill="#ff5a36" stroke="#a82a12" stroke-width="3"/>`).join('')}<g id="orb"><circle r="14" fill="#ff5a36" stroke="#a82a12" stroke-width="3"/><circle r="5" fill="#ffd23f"/></g><g transform="translate(${G[0]} ${G[1]})"><path d="M0-18L5-6L18-6L8 3L12 16L0 8L-12 16L-8 3L-18-6L-5-6Z" fill="#ffd23f" stroke="#e0a800" stroke-width="2"/></g><circle id="bl" r="${R}" fill="#3a86ff" stroke="#fff" stroke-width="3"/>`,'#2a1f3d');
+ const hit=()=>hz.some(h=>Math.hypot(b[0]-cl(b[0],h[0],h[0]+h[2]),b[1]-cl(b[1],h[1],h[1]+h[3]))<R)||Math.hypot(b[0]-260,b[1]-oy)<R+14;
+ const check=()=>{if(dead||won)return;
+  if(hit()){dead=true;beep(120,.4,'sawtooth');toast('Burnt! Mirror controls are tricky...');setTimeout(()=>{b=[...S];dead=false;last=null;if(run===runId)render()},800)}
+  else if(Math.hypot(b[0]-G[0],b[1]-G[1])<20)win('You tamed the mirror!')};
+ const render=()=>{const e=$('#bl');if(e){e.setAttribute('cx',b[0]);e.setAttribute('cy',b[1])}};
+ sv.onpointerdown=e=>{e.preventDefault();try{sv.setPointerCapture(e.pointerId)}catch(x){}last=pt(e)};
+ sv.onpointermove=e=>{if(!last||dead||won)return;const p=pt(e);b[0]=cl(b[0]-(p.x-last.x),R,400-R);b[1]=cl(b[1]-(p.y-last.y),R,300-R);last=p;render();check()};
+ sv.onpointerup=sv.onpointercancel=()=>{last=null};
+ const tick=now=>{if(run!==runId||won)return;oy=150+90*Math.sin((now-t0)/1000*1.5);$('#orb').setAttribute('transform',`translate(260 ${oy})`);check();requestAnimationFrame(tick)};
+ render();requestAnimationFrame(tick)}},
+{t:'Memory Match',q:'Find all 6 pairs! You only have 12 tries (one try = flipping two cards).',h:'Concentrate and remember where each shape is. Flip carefully, a good memory beats guessing.',f(){
+ const run=runId,SH=['<circle r="18" fill="#e63946"/>','<rect x="-16" y="-16" width="32" height="32" rx="4" fill="#3a86ff"/>','<path d="M0-19L19 15H-19Z" fill="#2ec4b6"/>','<path d="M0-20L5-7L19-7L8 2L12 16L0 8L-12 16L-8 2L-19-7L-5-7Z" fill="#ffb703"/>','<path d="M0-20L16 0L0 20L-16 0Z" fill="#9b5de5"/>','<path d="M-6-18H6V-6H18V6H6V18H-6V6H-18V-6H-6Z" fill="#f4a261"/>'],MAX=12;
+ const deck=[0,1,2,3,4,5,0,1,2,3,4,5].sort(()=>Math.random()-.5),mt=Array(12).fill(false);let open=[],tries=0,lock=false;
+ setScene(deck.map((s,i)=>{const x=36+(i%4)*84,y=24+(i/4|0)*78;return `<g id="cd${i}" style="cursor:pointer"><rect id="cb${i}" x="${x}" y="${y}" width="76" height="70" rx="12" fill="#5b6bbf" stroke="#fff" stroke-width="3"/><text id="cq${i}" x="${x+38}" y="${y+35}" text-anchor="middle" dominant-baseline="central" font-size="30" font-weight="900" fill="#fff">?</text><g id="cf${i}" style="display:none"><rect x="${x}" y="${y}" width="76" height="70" rx="12" fill="#fff" stroke="#5b6bbf" stroke-width="3"/><g transform="translate(${x+38} ${y+35})">${SH[s]}</g></g></g>`}).join('')+'<text id="mt" x="200" y="289" text-anchor="middle" font-size="16" font-weight="700" fill="#23305a"></text>','#eaf0ff');
+ const upd=()=>{$('#mt').textContent=`Tries left: ${MAX-tries}`},flip=(i,up)=>{$('#cf'+i).style.display=up?'':'none';$('#cb'+i).style.display=up?'none':'';$('#cq'+i).style.display=up?'none':''};
+ upd();
+ for(let i=0;i<12;i++)$('#cd'+i).onclick=()=>{if(lock||won||mt[i]||open.includes(i))return;flip(i,1);beep(400,.05);open.push(i);
+  if(open.length==2){const[a,b]=open;tries++;upd();lock=true;
+   setTimeout(()=>{if(run!==runId)return;open=[];
+    if(deck[a]==deck[b]){mt[a]=mt[b]=true;beep(700,.12);lock=false;if(mt.every(v=>v))win(`All pairs found with ${MAX-tries} tries to spare!`)}
+    else{flip(a,0);flip(b,0);lock=false;if(tries>=MAX){lock=true;toast('Out of tries! Shuffling the cards...');beep(150,.4,'sawtooth');setTimeout(()=>{if(run===runId)play(cur)},1400)}}},700)}}}},
+{t:'Beat the Robot',q:'21 sticks. Take 1, 2 or 3 sticks each turn. Whoever takes the LAST stick wins! You go first.',h:'There is a secret: after YOUR turn, the number of sticks left should always be a multiple of 4. So how many should you take first?',f(){
+ const run=runId;let left=21,busy=false;
+ setScene(Array.from({length:21},(_,i)=>`<rect id="sk${i}" x="${52+(i%7)*42}" y="${22+(i/7|0)*72}" width="14" height="56" rx="5" fill="#c8914f" stroke="#7a4a1a" stroke-width="2" style="transition:opacity .25s,transform .25s"/>`).join('')+'<text id="nl" x="200" y="258" text-anchor="middle" font-size="18" font-weight="700" fill="#23305a"></text><text id="nm" x="200" y="284" text-anchor="middle" font-size="15" font-weight="700" fill="#c0392b"></text>','#fff3d6');
+ $('#extra').innerHTML=[1,2,3].map(n=>`<button class="b g" id="n${n}">Take ${n}</button>`).join('');
+ const render=()=>{for(let i=0;i<21;i++){const e=$('#sk'+i);e.style.opacity=i<left?1:.08;e.style.transform=i<left?'':'translateY(10px)'}$('#nl').textContent='Sticks left: '+left;[1,2,3].forEach(n=>{const b=$('#n'+n);if(b)b.disabled=busy||won||left<n})};
+ const say=m=>{const e=$('#nm');if(e)e.textContent=m};
+ const robot=()=>{if(run!==runId)return;const r=left%4,t=Math.min(left,r?r:1+(Math.random()*3|0));left-=t;beep(220,.15,'square');say(`Robot takes ${t}`);render();
+  if(left==0){toast('The robot took the last stick! Try again.');beep(130,.5,'sawtooth');setTimeout(()=>{if(run===runId)play(cur)},1800)}else{busy=false;render()}};
+ [1,2,3].forEach(n=>$('#n'+n).onclick=()=>{if(busy||won||left<n)return;left-=n;beep(500,.08);say('');
+  if(left==0){render();win('You took the last stick! Human wins!');return}
+  busy=true;render();say('Robot is thinking...');setTimeout(robot,900)});
+ render()}},
+/* ---- LEVEL 30 (the last entry in LV) ---- */
 {t:'Human or Alien?',q:'Is she a human in an alien costume, or a real alien? Use both scanners, then decide.',h:'Scan her from head to toe with the Scanner. Then switch on the Super Scanner and scan her again to see what is under the alien skin.',f(){
  const C=SCANNER,R=C.radius,run=runId,c=C.character,b=C.body,nm=esc(CHAR.name);
  $('#q').textContent=`Is ${CHAR.name} a human in an alien costume, or a real alien? Use both scanners, then decide.`;
@@ -334,13 +602,14 @@ const LV=[
 ];
 
 /* ===================== 5. GAME ENGINE ===================== */
+function unlock(){if(cur+2>un&&cur<LV.length-1){un=cur+2;LS.set('bq_un',un)}}
 function win(m='Great job!'){if(won&&cur!=4&&cur!=6)return;if(won&&$('#win').classList.contains('on'))return;won=true;
  beep(523,.15);setTimeout(()=>beep(659,.15),150);setTimeout(()=>beep(784,.3),300);
- if(cur+2>un&&cur<9){un=cur+2;LS.set('bq_un',un)}
- $('#bar i').style.width=(cur+1)*10+'%';$('#wm').textContent=m;$('#nx').textContent=cur<9?'Next Level ▶':'Finish';
+ unlock();
+ $('#bar i').style.width=(cur+1)/LV.length*100+'%';$('#wm').textContent=m;$('#nx').textContent=cur<LV.length-1?'Next Level ▶':'Finish';
  confetti();setTimeout(()=>$('#win').classList.add('on'),cur==4||cur==6?200:700)}
 function play(i){if(i>=un||i<0)return;cur=i;won=false;runId++;$('#win').classList.remove('on');const L=LV[i];
- $('#lv').textContent=`Level ${i+1} of 10`;$('#bar i').style.width=i*10+'%';$('#ttl').textContent=`${i+1}. ${L.t}`;$('#q').textContent=L.q;$('#pre').innerHTML='';$('#extra').innerHTML='';
+ $('#lv').textContent=`Level ${i+1} of ${LV.length}`;$('#bar i').style.width=i/LV.length*100+'%';$('#ttl').textContent=`${i+1}. ${L.t}`;$('#q').textContent=L.q;$('#pre').innerHTML='';$('#extra').innerHTML='';
  show('game');L.f()}
 function renderGrid(){$('#grid').innerHTML=LV.map((l,i)=>`<button class="b ${i<un?'g':''}" ${i>=un?'disabled':''} data-i="${i}" title="${l.t}">${i<un?i+1:'–'}</button>`).join('')}
 $('#grid').onclick=e=>{const b=e.target.closest('button');if(b&&!b.disabled)play(+b.dataset.i)};
@@ -348,6 +617,6 @@ $$('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
 $('#bp').onclick=()=>show('lvls');$('#be').onclick=openEd;$('#bm').onclick=()=>{runId++;show('lvls')};
 $('#bh').onclick=()=>toast(''+LV[cur].h);$('#br').onclick=()=>play(cur);
 $('#brst').onclick=()=>{un=1;LS.set('bq_un',1);renderGrid();toast('Progress reset.')};
-$('#nx').onclick=()=>{$('#win').classList.remove('on');if(cur<9)play(cur+1);else{runId++;show('done');confetti()}};
+$('#nx').onclick=()=>{$('#win').classList.remove('on');if(cur<LV.length-1)play(cur+1);else{runId++;show('done');confetti()}};
 renderGrid();
 </script></body></html>
