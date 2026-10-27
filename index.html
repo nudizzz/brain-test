@@ -41,26 +41,32 @@ h1{font-size:3.2rem;margin:.25em 0;color:#fff;letter-spacing:.02em;text-shadow:0
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}@keyframes bob{50%{transform:translateY(-16px)}}
 @keyframes wob{50%{transform:translateY(-8px) rotate(-1.5deg)}}@keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
 .pbar{height:12px;background:#ece6ff;border-radius:8px;overflow:hidden;margin-top:6px}.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2ee59d,#4cc9f0);transition:width .2s}
+.tkb{display:inline-block;background:#fff;color:#7f3dff;font-weight:700;border-radius:16px;padding:8px 14px;margin:10px 0 2px;box-shadow:0 4px 0 #4b1fa033}.b.dim{opacity:.6}
+#snd{position:fixed;top:10px;right:10px;z-index:25;width:46px;height:46px;padding:0;border-radius:50%;border:3px solid #fff;background:#7f3dff;color:#fff;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 0 #4b1fa055;display:flex;align-items:center;justify-content:center}#snd:active{transform:translateY(3px);box-shadow:none}
+#game>div:first-child{padding-right:56px}
+#grid .b{padding:12px 0}#grid .b .st{display:block;font-size:.62rem;letter-spacing:1px;line-height:1;margin-top:3px;color:#fff;text-shadow:0 1px 0 #0006}
+#wst{margin:2px 0 6px}#wst span{font-size:2.8rem;color:#ddd;display:inline-block;margin:0 2px}#wst span.on{color:#ffc81e;text-shadow:0 3px 0 #e0a800;animation:pop .45s both}
 .pk{border:4px solid #fff;border-radius:18px;padding:0;background:#fff;cursor:pointer;width:31%;aspect-ratio:3/4;overflow:hidden;box-shadow:0 6px 0 #4b1fa033;transition:transform .15s}.pk:hover{transform:scale(1.05) rotate(-1deg)}.pk:active{transform:scale(.97)}.pk img{width:100%;height:100%;object-fit:cover;display:block}
 </style></head><body>
+<button id="snd" aria-label="Sound">🔊</button>
 
 <div class="scr on" id="title"><div class="hero">🧠✨🎮</div><h1>Brain Quest</h1><p>Thirty tricky puzzles. Don't believe your eyes!</p>
-<button class="b g" id="bp">Play</button><br><button class="b" id="be">Edit Character</button></div>
+<button class="b g" id="bp">Play</button><br><button class="b r" id="bd">📅 Daily Challenge</button><br><button class="b" id="be">Edit Character</button><br><div class="tkb" id="dls"></div></div>
 
-<div class="scr" id="lvls"><h1 style="font-size:2rem">Choose a level</h1><div id="grid"></div><p>Solve a level to unlock the next one.</p>
+<div class="scr" id="lvls"><h1 style="font-size:2rem">Choose a level</h1><div id="grid"></div><div class="tkb" id="tkg"></div> <div class="tkb" id="stg"></div><p>Solve a level to unlock the next one.</p>
 <button class="b" data-go="title">Back</button><button class="b r" id="brst">Reset progress</button></div>
 
 <div class="scr" id="game">
 <div style="display:flex;justify-content:space-between;align-items:center"><button class="b" id="bm" style="margin:0">Levels</button><b id="lv"></b></div>
 <div id="bar"><i></i></div><h2 id="ttl"></h2><div class="card" id="q"></div>
 <div id="pre"></div><div class="card" id="stage"></div><div id="extra"></div>
-<button class="b" id="bh">Hint</button><button class="b r" id="br">Restart</button></div>
+<button class="b" id="bh">Hint</button><button class="b" id="bs"></button><button class="b r" id="br">Restart</button></div>
 
 <div class="scr" id="done"><h1>You did it!</h1>
 <div class="card"><h2>All 30 levels complete</h2><p>You fed the cat, escaped the dragon, cracked the safe, beat the robot and ran a flawless security inspection. Brain officially tested!</p></div>
-<button class="b g" data-go="lvls">Play again</button><button class="b" data-go="title">Main menu</button></div>
+<button class="b r" id="shd">📣 Share</button><button class="b g" data-go="lvls">Play again</button><button class="b" data-go="title">Main menu</button></div>
 
-<div class="ov" id="win"><div class="card"><h2>Solved!</h2><p id="wm"></p><button class="b g" id="nx"></button></div></div>
+<div class="ov" id="win"><div class="card"><h2 id="wh">Solved!</h2><div id="wst"></div><p id="wm"></p><p id="wtk" style="font-weight:700;color:#ff4d8d;font-size:1.1rem"></p><button class="b g" id="nx"></button><button class="b" id="sh">📣 Share</button></div></div>
 
 <div class="ov" id="ed"><div class="card"><h2>Character Editor</h2>
 <svg id="prev" viewBox="0 0 200 330" style="width:130px;height:215px;background:#e8f4ff;border-radius:14px"></svg>
@@ -144,10 +150,13 @@ const CHAR=Object.assign({},DEFAULT_CHAR);
 try{Object.assign(CHAR,JSON.parse(LS.get('bq_char')||'{}'))}catch(e){}
 let un=Math.min(30,Math.max(1,+LS.get('bq_un')||1)),cur=0,won=false,runId=0,sv=null,AC;
 const stage=$('#stage');
-function beep(f=600,d=.12,t='sine',v=.12){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
+/* ---- Sound, star ratings and daily-challenge state ---- */
+let volI=Math.min(2,Math.max(0,+LS.get('bq_vol')||0)),dailyMode=false,att=0,hnt=0,t0g=Date.now(),lastP=-1,shareMsg='',stars={};
+try{stars=JSON.parse(LS.get('bq_st')||'{}')}catch(e){}
+function beep(f=600,d=.12,t='sine',v=.12){const vm=[1,.35,0][volI];if(!vm)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();v*=vm;const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2800)}
 function confetti(){for(let i=0;i<44;i++){const c=document.createElement('div');c.className='cf';c.style.left=Math.random()*100+'vw';c.style.background=`hsl(${Math.random()*360} 90% 60%)`;c.style.animationDelay=Math.random()*.6+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),3400)}}
-function show(id){$$('.scr').forEach(s=>s.classList.toggle('on',s.id==id));if(id=='lvls')renderGrid()}
+function show(id){if(id!='game')dailyMode=false;$$('.scr').forEach(s=>s.classList.toggle('on',s.id==id));if(id=='lvls')renderGrid();if(id=='title')updDaily()}
 
 /* Scene helpers: T = emoji prop, D = draggable object, setScene = new level SVG */
 /* ICONS: original SVG art, each drawn in a 40x40 box centred on (0,0).
@@ -360,10 +369,10 @@ const LV=[
   im.onerror=()=>{k++;if(k<list.length)im.src=list[k];else{im.onerror=null;im.src='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 160"><rect width="120" height="160" fill="#cfd8ff"/><text x="60" y="86" text-anchor="middle" font-size="20" font-family="sans-serif" fill="#456">img${i+1}</text></svg>`)}};
   im.src=list[0]});
  $$('#stage .pk').forEach(b=>b.onclick=()=>{if(won)return;won=true;LS.set('bq_pick',b.dataset.i);
-  beep(523,.12);setTimeout(()=>beep(784,.25),130);confetti();unlock();$('#bar i').style.width=(cur+1)/LV.length*100+'%';
+  beep(523,.12);setTimeout(()=>beep(784,.25),130);confetti();unlock();saveStars(3);const gt=earnTicket();$('#bar i').style.width=(cur+1)/LV.length*100+'%';
   stage.innerHTML=`<div style="padding:30px 10px;font-size:1.5rem;font-weight:800;line-height:1.6">Wanna see your character in action?<br><a id="go" href="${esc(B.link||'#')}" style="color:#fff;background:#52d273;box-shadow:0 5px 0 #2b9c4b;padding:10px 24px;border-radius:16px;text-decoration:none;display:inline-block;margin-top:10px">Click Here ▶</a></div>`;
   $('#go').onclick=e=>{if(!B.link){e.preventDefault();toast('The link is coming soon!')}};
-  $('#extra').innerHTML='<button class="b" id="cont">Continue to the next level ▶</button>';$('#cont').onclick=()=>play(cur+1)})}},
+  $('#extra').innerHTML=(gt?'<p style="color:#fff;font-weight:700;font-size:1.15rem;text-shadow:0 2px 0 #0003">🎟️ You earned a Skipping Ticket!</p>':'')+'<button class="b" id="cont">Continue to the next level ▶</button>';$('#cont').onclick=()=>play(cur+1)})}},
 {t:'Two Doors',q:'One door hides a treasure, the other hides a dragon. Exactly ONE of the two signs is telling the truth. Pick a door!',h:'Suppose the sign that says "treasure AND dragon" is true. Then the other sign would be true as well, but only one sign can be true. So that sign must be a lie.',f(){
  const run=runId,A=['The treasure is in','this room AND a dragon','is in the other room.'],Bt=['One room has a treasure','and one room has','a dragon.'],aSide=Math.random()<.5?0:1,good=1-aSide,xs=[25,225];
  const chest='<rect x="-28" y="-6" width="56" height="36" rx="4" fill="#a0522d" stroke="#5a3a1a" stroke-width="3"/><path d="M-28-6Q0-34 28-6Z" fill="#c8914f" stroke="#5a3a1a" stroke-width="3"/><rect x="-6" y="0" width="12" height="14" rx="2" fill="gold" stroke="#c98600" stroke-width="2"/><path d="M-36-30L-32-20M36-30L32-20M0-44V-34" stroke="#ffd23f" stroke-width="4" stroke-linecap="round"/>';
@@ -602,21 +611,63 @@ const LV=[
 ];
 
 /* ===================== 5. GAME ENGINE ===================== */
+/* ---- Sound button: loud > quiet > muted ---- */
+function updSnd(){$('#snd').textContent=['🔊','🔉','🔇'][volI]}
+$('#snd').onclick=()=>{volI=(volI+1)%3;LS.set('bq_vol',volI);updSnd();toast(['Sound: loud','Sound: quiet','Sound: muted'][volI]);beep(660,.1)};
+/* ---- Star ratings: 3 = clean and quick; lose a star for a retry, a hint, being slow or retrying 3+ times (min 1) ---- */
+const PAR={19:90,20:90,21:120,22:45,23:45,24:120,25:45,26:120,27:90,28:60,29:180};
+function calcStars(){if(cur==14)return 3;const el=(Date.now()-t0g)/1000,par=PAR[cur]||60,p=(att>=1?1:0)+(att>=3?1:0)+(hnt>=1?1:0)+(el>par?1:0);return Math.max(1,3-p)}
+function saveStars(n){if(stars[cur]===undefined||n>stars[cur]){stars[cur]=n;LS.set('bq_st',JSON.stringify(stars))}}
+const starRow=n=>'★'.repeat(n)+'☆'.repeat(3-n),starsHTML=n=>[0,1,2].map(i=>`<span class="${i<n?'on':''}" style="animation-delay:${.3+i*.18}s">★</span>`).join('');
+/* ---- Daily Challenge: one level per day (same for everyone), plus a streak counter ---- */
+const pad=n=>String(n).padStart(2,'0'),dkey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,todayK=()=>dkey(new Date()),yestK=()=>{const d=new Date();d.setDate(d.getDate()-1);return dkey(d)};
+function dailyLevel(){let h=0;for(const c of todayK())h=(h*31+c.charCodeAt(0))>>>0;const cand=[...Array(LV.length).keys()].filter(i=>i!=14);return cand[h%cand.length]}
+function dstreak(){const l=LS.get('bq_dl');return l==todayK()||l==yestK()?(+LS.get('bq_ds')||0):0}
+function updDaily(){const e=$('#dls');if(!e)return;e.textContent=LS.get('bq_dl')==todayK()?`✅ Done today  ·  🔥 Streak: ${dstreak()}`:`🔥 Streak: ${dstreak()}  ·  today's challenge is waiting!`}
+function dailyDone(){const t=todayK();if(LS.get('bq_dl')==t)return dstreak();const s=(LS.get('bq_dl')==yestK()?(+LS.get('bq_ds')||0):0)+1;LS.set('bq_dl',t);LS.set('bq_ds',s);LS.set('bq_db',Math.max(s,+LS.get('bq_db')||0));return s}
+/* ---- Share ---- */
+function shareIt(text){const url=location.href.split('#')[0],full=text+' '+url;
+ if(navigator.share){navigator.share({title:'Brain Quest',text,url}).catch(()=>{})}
+ else if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(full).then(()=>toast('Link copied! Paste it to your friends 📣'),()=>toast(full))}
+ else toast(full)}
+/* ---- Skipping Tickets: earn 1 after solving every 5th level (5, 10, 15...). Using one solves the current level for you. ---- */
+let tk=Math.max(0,+LS.get('bq_tk')||0),tkd=[],skipArm=0,skipping=false;
+try{tkd=JSON.parse(LS.get('bq_tkd')||'[]')}catch(e){}
+function saveTk(){LS.set('bq_tk',tk);LS.set('bq_tkd',JSON.stringify(tkd))}
+if(LS.get('bq_tkd')===null){for(let k=5;k<LV.length;k+=5)if(un>k){tkd.push(k-1);tk++}saveTk()}
+function updTk(){const b=$('#bs');if(b){b.textContent=`🎟️ Skip (${tk})`;b.classList.toggle('g',tk>0);b.classList.toggle('dim',tk<=0)}const g=$('#tkg');if(g)g.textContent=`🎟️ Skipping Tickets: ${tk}  ·  earn 1 after every 5 levels you solve`}
+function earnTicket(){if((cur+1)%5||cur>=LV.length-1||tkd.includes(cur))return false;tkd.push(cur);tk++;saveTk();updTk();return true}
 function unlock(){if(cur+2>un&&cur<LV.length-1){un=cur+2;LS.set('bq_un',un)}}
-function win(m='Great job!'){if(won&&cur!=4&&cur!=6)return;if(won&&$('#win').classList.contains('on'))return;won=true;
+function win(m='Great job!'){if(skipping)return;if(won&&cur!=4&&cur!=6)return;if(won&&$('#win').classList.contains('on'))return;won=true;
  beep(523,.15);setTimeout(()=>beep(659,.15),150);setTimeout(()=>beep(784,.3),300);
- unlock();
- $('#bar i').style.width=(cur+1)/LV.length*100+'%';$('#wm').textContent=m;$('#nx').textContent=cur<LV.length-1?'Next Level ▶':'Finish';
+ const n=calcStars();saveStars(n);$('#wst').innerHTML=starsHTML(n);shareMsg=`I beat Level ${cur+1} (${LV[cur].t}) in Brain Quest ${starRow(n)} Can you?`;
+ if(dailyMode){const sd=dailyDone();$('#wh').textContent='Daily Challenge Complete!';$('#wtk').textContent=`🔥 Daily streak: ${sd} ${sd==1?'day':'days'}`;shareMsg=`📅 I completed today's Brain Quest Daily Challenge! 🔥 ${sd}-day streak. Can you beat it?`}
+ else{$('#wh').textContent='Solved!';unlock();if(earnTicket())$('#wtk').textContent='🎟️ You earned a Skipping Ticket! Use it to skip any level.'}
+ $('#bar i').style.width=(cur+1)/LV.length*100+'%';$('#wm').textContent=m;$('#nx').textContent=dailyMode?'Back to menu':cur<LV.length-1?'Next Level ▶':'Finish';
  confetti();setTimeout(()=>$('#win').classList.add('on'),cur==4||cur==6?200:700)}
-function play(i){if(i>=un||i<0)return;cur=i;won=false;runId++;$('#win').classList.remove('on');const L=LV[i];
- $('#lv').textContent=`Level ${i+1} of ${LV.length}`;$('#bar i').style.width=i/LV.length*100+'%';$('#ttl').textContent=`${i+1}. ${L.t}`;$('#q').textContent=L.q;$('#pre').innerHTML='';$('#extra').innerHTML='';
+function play(i,daily=dailyMode){if(i<0||i>=LV.length||(!daily&&i>=un))return;dailyMode=daily;
+ const fresh=!$('#game').classList.contains('on')||lastP!==i;if(fresh){att=0;hnt=0;t0g=Date.now()}else att++;lastP=i;
+ cur=i;won=false;runId++;$('#win').classList.remove('on');$('#wtk').textContent='';$('#wst').innerHTML='';const L=LV[i];
+ $('#lv').textContent=daily?'📅 Daily Challenge':`Level ${i+1} of ${LV.length}`;$('#bar i').style.width=i/LV.length*100+'%';$('#ttl').textContent=`${i+1}. ${L.t}`;$('#q').textContent=L.q;$('#pre').innerHTML='';$('#extra').innerHTML='';
  show('game');L.f()}
-function renderGrid(){$('#grid').innerHTML=LV.map((l,i)=>`<button class="b ${i<un?'g':''}" ${i>=un?'disabled':''} data-i="${i}" title="${l.t}">${i<un?i+1:'–'}</button>`).join('')}
-$('#grid').onclick=e=>{const b=e.target.closest('button');if(b&&!b.disabled)play(+b.dataset.i)};
+function renderGrid(){$('#grid').innerHTML=LV.map((l,i)=>`<button class="b ${i<un?'g':''}" ${i>=un?'disabled':''} data-i="${i}" title="${l.t}">${i<un?i+1:'–'}${i<un&&stars[i]!==undefined?`<span class="st">${starRow(stars[i])}</span>`:''}</button>`).join('');$('#stg').textContent=`⭐ Stars: ${Object.values(stars).reduce((a,b)=>a+b,0)} / ${LV.length*3}`}
+$('#grid').onclick=e=>{const b=e.target.closest('button');if(b&&!b.disabled)play(+b.dataset.i,false)};
 $$('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
-$('#bp').onclick=()=>show('lvls');$('#be').onclick=openEd;$('#bm').onclick=()=>{runId++;show('lvls')};
-$('#bh').onclick=()=>toast(''+LV[cur].h);$('#br').onclick=()=>play(cur);
-$('#brst').onclick=()=>{un=1;LS.set('bq_un',1);renderGrid();toast('Progress reset.')};
-$('#nx').onclick=()=>{$('#win').classList.remove('on');if(cur<LV.length-1)play(cur+1);else{runId++;show('done');confetti()}};
-renderGrid();
+$('#bp').onclick=()=>show('lvls');$('#be').onclick=openEd;$('#bm').onclick=()=>{const d=dailyMode;runId++;show(d?'title':'lvls')};
+$('#bh').onclick=()=>{hnt++;toast(''+LV[cur].h)};$('#br').onclick=()=>play(cur);
+$('#brst').onclick=()=>{un=1;LS.set('bq_un',1);stars={};LS.set('bq_st','{}');tk=0;tkd=[];saveTk();updTk();renderGrid();toast('Progress reset.')};
+$('#nx').onclick=()=>{$('#win').classList.remove('on');if(dailyMode){show('title');return}if(cur<LV.length-1)play(cur+1);else{runId++;show('done');confetti()}};
+$('#bs').onclick=()=>{if(won||skipping)return;if(dailyMode){toast('Skipping Tickets cannot be used on the Daily Challenge!');return}
+ if(tk<=0){toast('No Skipping Tickets yet! You earn 1 after every 5 levels you solve (5, 10, 15...).');return}
+ if(!skipArm){skipArm=setTimeout(()=>{skipArm=0;updTk()},3000);$('#bs').textContent='Tap again to use ticket!';return}
+ clearTimeout(skipArm);skipArm=0;skipping=true;won=true;runId++;tk--;saveTk();unlock();if(stars[cur]===undefined){stars[cur]=0;LS.set('bq_st',JSON.stringify(stars))}updTk();
+ beep(523,.12);setTimeout(()=>beep(784,.2),120);confetti();
+ $('#bar i').style.width=(cur+1)/LV.length*100+'%';$('#extra').innerHTML='';
+ $('#stage').innerHTML='<div style="padding:46px 10px;font-size:1.5rem;font-weight:800;line-height:1.5">🎟️ ✨ Skipping Ticket used! ✨<br>Solving this level for you...</div>';
+ const my=runId,i=cur;
+ setTimeout(()=>{skipping=false;if(my!==runId)return;if(i<LV.length-1)play(i+1);else{show('done');confetti()}},1600)};
+$('#bd').onclick=()=>play(dailyLevel(),true);
+$('#sh').onclick=()=>shareIt(shareMsg);
+$('#shd').onclick=()=>shareIt(`I finished all ${LV.length} levels of Brain Quest with ${Object.values(stars).reduce((a,b)=>a+b,0)} stars! 🧠 Can you?`);
+renderGrid();updTk();updSnd();updDaily();
 </script></body></html>
